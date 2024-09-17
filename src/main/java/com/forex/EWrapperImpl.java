@@ -21,8 +21,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 //! [ewrapperimpl]
 public class EWrapperImpl implements  EWrapper {
     //! [ewrapperimpl]
-   // private SheetHandler sheetHandler = new SheetHandler();
-    //private org.apache.poi.ss.usermodel.Sheet sheet;
+
     //! [socket_declare]
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
@@ -31,7 +30,7 @@ public class EWrapperImpl implements  EWrapper {
 
     //! [socket_init]
     public EWrapperImpl() {
-      //  sheet = sheetHandler.createSheet();
+
         readerSignal = new EJavaSignal();
         clientSocket = new EClientSocket(this, readerSignal);
     }
@@ -180,9 +179,13 @@ public class EWrapperImpl implements  EWrapper {
     //! [execdetailsend]
      private int rowNumber=0;
      private Workbook workbook = new XSSFWorkbook();
+    private SheetHandler sheetHandler = new SheetHandler();
+
+    private org.apache.poi.ss.usermodel.Sheet sheet =sheetHandler.createSheet(workbook);
     //! [updatemktdepth]
     @Override
     public void updateMktDepth(int tickerId, int position, int operation, int side, double price, Decimal size) {
+        //workbook = new XSSFWorkbook();
         String [] dataRow = new String[]{new Integer(position).toString(),new Integer(operation).toString(),new Integer(side).toString(),new Double(price).toString(), size.toString() };
         List<String[]> dataArray = new ArrayList<>();
         dataArray.add(dataRow);
@@ -224,14 +227,11 @@ public class EWrapperImpl implements  EWrapper {
          */
 
 
-        Workbook workbook = new XSSFWorkbook();
 
-        // Create a sheet
-        Sheet sheet = workbook.createSheet("Data");
 
-        int rowIndex = 0;
+
         for (String[] rowData : dataArray) {
-            Row row = sheet.createRow(rowIndex++);  // Create a new row for each entry
+            Row row = sheet.createRow(rowNumber++);  // Create a new row for each entry
             int colIndex = 0;
             for (String cellData : rowData) {
                 Cell cell = row.createCell(colIndex++);
@@ -253,11 +253,14 @@ public class EWrapperImpl implements  EWrapper {
         }
 
         // Close the workbook
+        /*
         try {
-            workbook.close();
+           workbook.close();
         } catch (IOException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
+
+         */
 
         /*
         rowNumber=rowNumber+1;

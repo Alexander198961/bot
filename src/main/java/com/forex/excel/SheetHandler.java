@@ -5,8 +5,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class SheetHandler {
-    public Sheet createSheet(){
-        Workbook workbook = new XSSFWorkbook();
+    public Sheet createSheet(Workbook workbook){
+
         return workbook.createSheet("Data");
     }
 }
