@@ -5,12 +5,7 @@ import org.junit.Test;
 
 public class OptionTest extends TestSetUp {
 
-   // @Test
 
-
-    private String durationString = "10 D";
-    private String endDateTime = "";
-    private String barSizeSetting = "1 day";
     @Test
     public void testcurrency() throws Exception{
         Contract eurusdContract = new Contract();

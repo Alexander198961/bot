@@ -2,17 +2,27 @@ package com.forex;/* Copyright (C) 2019 Interactive Brokers LLC. All rights rese
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.forex.excel.SheetHandler;
 import com.ib.client.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 //! [ewrapperimpl]
 public class EWrapperImpl implements  EWrapper {
     //! [ewrapperimpl]
-
+   // private SheetHandler sheetHandler = new SheetHandler();
+    //private org.apache.poi.ss.usermodel.Sheet sheet;
     //! [socket_declare]
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
@@ -21,6 +31,7 @@ public class EWrapperImpl implements  EWrapper {
 
     //! [socket_init]
     public EWrapperImpl() {
+      //  sheet = sheetHandler.createSheet();
         readerSignal = new EJavaSignal();
         clientSocket = new EClientSocket(this, readerSignal);
     }
@@ -167,10 +178,104 @@ public class EWrapperImpl implements  EWrapper {
         System.out.println("Exec Details End: " + EWrapperMsgGenerator.execDetailsEnd( reqId));
     }
     //! [execdetailsend]
-
+     private int rowNumber=0;
+     private Workbook workbook = new XSSFWorkbook();
     //! [updatemktdepth]
     @Override
     public void updateMktDepth(int tickerId, int position, int operation, int side, double price, Decimal size) {
+        String [] dataRow = new String[]{new Integer(position).toString(),new Integer(operation).toString(),new Integer(side).toString(),new Double(price).toString(), size.toString() };
+        List<String[]> dataArray = new ArrayList<>();
+        dataArray.add(dataRow);
+        /*
+
+        //Row row = sheet.createRow(rowNumber);
+        List<String[]> data = new ArrayList<>();
+        int rowIndex =0;
+        data.add(dataArray);
+        for (String[] rowData : data) {
+            Row row = sheet.createRow(rowIndex++);  // Create a new row for each entry
+            int colIndex = 0;
+            for (String cellData : rowData) {
+                Cell cell = row.createCell(colIndex++);
+                cell.setCellValue(cellData);  // Set the value for each cell
+            }
+        }
+
+        // Resize all columns to fit the content size
+        for (int i = 0; i < data.get(0).length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write the output to a file
+        try (FileOutputStream fileOut = new FileOutputStream("batch_output.xlsx")) {
+            workbook.write(fileOut);
+            System.out.println("Excel file 'batch_output.xlsx' created successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Close the workbook
+        try {
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+         */
+
+
+        Workbook workbook = new XSSFWorkbook();
+
+        // Create a sheet
+        Sheet sheet = workbook.createSheet("Data");
+
+        int rowIndex = 0;
+        for (String[] rowData : dataArray) {
+            Row row = sheet.createRow(rowIndex++);  // Create a new row for each entry
+            int colIndex = 0;
+            for (String cellData : rowData) {
+                Cell cell = row.createCell(colIndex++);
+                cell.setCellValue(cellData);  // Set the value for each cell
+            }
+        }
+
+        // Resize all columns to fit the content size
+        for (int i = 0; i < dataArray.get(0).length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write the output to a file
+        try (FileOutputStream fileOut = new FileOutputStream("batch_output.xlsx")) {
+            workbook.write(fileOut);
+            System.out.println("Excel file 'batch_output.xlsx' created successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Close the workbook
+        try {
+            workbook.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*
+        rowNumber=rowNumber+1;
+        int colIndex = 0;
+        for (String cellData : dataArray) {
+            Cell cell = row.createCell(colIndex++);
+            cell.setCellValue(cellData);
+
+            // Set the value for each cell
+        }
+        try (FileOutputStream fileOut = new FileOutputStream("batch_output.xlsx")) {
+            workbook.write(fileOut);
+            System.out.println("Excel file 'batch_output.xlsx' created successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+         */
         System.out.println(EWrapperMsgGenerator.updateMktDepth(tickerId, position, operation, side, price, size));
     }
     //! [updatemktdepth]

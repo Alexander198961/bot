@@ -32,9 +32,10 @@ public class IBSignalHandler implements Runnable{
                     e.printStackTrace();
                     throw new IllegalStateException(e.getMessage());
                 }
+                //System.exit(0);
 
             }
         }).start();
-        m_client.reqMarketDataType(4);
+        //m_client.reqMarketDataType(4);
     }
 }
