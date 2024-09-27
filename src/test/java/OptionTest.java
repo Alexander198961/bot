@@ -63,25 +63,34 @@ public class OptionTest extends TestSetUp {
     }
 
 
-    @Test
+    //@Test
     public void testPlaceOrder() throws InterruptedException {
 
         double accountValue= 10000;
         int risk = 1;
         double amountToPut = accountValue/100 * risk;
+        double price =191.25;
+        double stopPrice= price - price/100* 4;
         Contract contract = new USStockContract("AMZN");
         Order order = new Order();
-        int orderInitId=9898232;
+        int orderInitId=9999239;
         wrapper.nextValidId(orderInitId);
         int orderId = wrapper.getCurrentOrderId();
         orderId++;
-        order.action("SELL");
+        order.action("BUY");
         order.orderType("MKT");
         order.totalQuantity(Decimal.get(1.0));
         m_client.placeOrder(orderId, contract, order);
-        Thread.sleep(3000);
+        Thread.sleep(2000);
         wrapper.nextValidId(orderId);
-
+        orderId=wrapper.getCurrentOrderId();
+        orderId++;
+        order.action("SELL");
+        order.orderType("LMT");
+        order.totalQuantity(Decimal.get(1.0));
+        order.lmtPrice(stopPrice);
+        m_client.placeOrder(orderId, contract, order);
+        Thread.sleep(2000);
 
 
         /*

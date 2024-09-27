@@ -7,7 +7,7 @@ plugins {
 group 'api'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 11
+sourceCompatibility = 8
 
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
@@ -23,7 +23,11 @@ jar {
 
 repositories {
     mavenCentral()
-    jcenter()
+  maven {
+        url 'https://dl.bintray.com/interactivebrokers/maven'
+    }
+  //  jcenter()
+//    maven { url = uri("https://mvnrepository.com/artifact") }
 }
 dependencies {
 
@@ -31,7 +35,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
     implementation('junit:junit:4.12')
-
+    //implementation group: 'com.ib', name: 'interactive-brokers-api', version: '9.73'
     implementation files ("TwsApi.jar")    // compile group: 'com.ib', name: 'interactive-brokers-api', version: '9.73'
 
 
@@ -39,4 +43,4 @@ dependencies {
 
 
 }
-targetCompatibility = JavaVersion.VERSION_11
+//targetCompatibility = JavaVersion.VERSION_11
