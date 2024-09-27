@@ -1,4 +1,4 @@
-package com.forex;
+package com.trading;
 
 import com.ib.client.EClientSocket;
 import com.ib.client.EReader;
@@ -7,8 +7,13 @@ import com.ib.client.EReaderSignal;
 import java.io.IOException;
 
 public class IBSignalHandler implements Runnable{
-    public IBSignalHandler(EWrapperImpl wrapper) {
+    int port ;
+    String host;
+
+    public IBSignalHandler(EWrapperImpl wrapper, int port, String host) {
         this.wrapper = wrapper;
+        this.port = port;
+        this.host = host;
     }
     EClientSocket m_client;
     private EWrapperImpl wrapper;
@@ -18,7 +23,7 @@ public class IBSignalHandler implements Runnable{
 
         m_client = wrapper.getClient();
         final EReaderSignal m_signal = wrapper.getSignal();
-        m_client.eConnect("127.0.0.1", 7496, 0);
+        m_client.eConnect(host, port, 0);
         assert m_client.isConnected();
         final EReader reader = new EReader(m_client, m_signal);
         reader.start();

@@ -1,22 +1,15 @@
-package com.forex;/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+package com.trading;/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.forex.excel.SheetHandler;
 import com.ib.client.*;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 //! [ewrapperimpl]
 public class EWrapperImpl implements  EWrapper {
@@ -26,6 +19,16 @@ public class EWrapperImpl implements  EWrapper {
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
     protected int currentOrderId = -1;
+
+    public List<Bar> getList() {
+        return list;
+    }
+
+    public void setList(List<Bar> list) {
+        this.list = list;
+    }
+
+    private List<Bar> list = new ArrayList<>();
     //! [socket_declare]
 
     //! [socket_init]
@@ -192,43 +195,10 @@ public class EWrapperImpl implements  EWrapper {
     private List<String[]> dataArray = new ArrayList<>();
     @Override
     public void updateMktDepth(int tickerId, int position, int operation, int side, double price, Decimal size) {
-        String [] dataRow = new String[]{new Integer(position).toString(),new Integer(operation).toString(),new Integer(side).toString(),new Double(price).toString(), size.toString() };
-
+        String sideType = (side == 0) ? "Buy" : "Sell";
+        java.sql.Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        String [] dataRow = new String[]{timestamp.toString(),new Integer(position).toString(),new Integer(operation).toString(),sideType,new Double(price).toString(), size.toString() };
         dataArray.add(dataRow);
-        /*
-        for (String[] rowData : dataArray) {
-            Row row = sheet.createRow(rowNumber++);  // Create a new row for each entry
-            int colIndex = 0;
-            for (String cellData : rowData) {
-                Cell cell = row.createCell(colIndex++);
-                cell.setCellValue(cellData);  // Set the value for each cell
-            }
-        }
-
-        // Resize all columns to fit the content size
-        for (int i = 0; i < dataArray.get(0).length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        // Write the output to a file
-        try (FileOutputStream fileOut = new FileOutputStream("batch_output.xlsx")) {
-            workbook.write(fileOut);
-            System.out.println("Excel file 'batch_output.xlsx' created successfully.");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        // Close the workbook
-        /*
-        try {
-           workbook.close();
-        } catch (IOException e) {
-           // e.printStackTrace();
-        }
-
-         */
-
-
         System.out.println(EWrapperMsgGenerator.updateMktDepth(tickerId, position, operation, side, price, size));
     }
     //! [updatemktdepth]
@@ -264,6 +234,8 @@ public class EWrapperImpl implements  EWrapper {
     //! [historicaldata]
     @Override
     public void historicalData(int reqId, Bar bar) {
+        list.add(bar);
+        //System.out.println("bar volume==="+ bar.volume().value());
         System.out.println("HistoricalData:  " + EWrapperMsgGenerator.historicalData(reqId, bar.time(), bar.open(), bar.high(), bar.low(), bar.close(), bar.volume(), bar.count(), bar.wap()));
     }
     //! [historicaldata]
