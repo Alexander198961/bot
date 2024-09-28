@@ -6,7 +6,7 @@ import java.util.List;
 
 public class VolumeCalculator implements Calculator{
     @Override
-    public void calculate(List<Bar> barList) {
+    public double calculate(List<Bar> barList) {
         double sum = 0;
         for (Bar bar : barList) {
            sum=sum+ bar.volume().value().doubleValue();
@@ -14,5 +14,8 @@ public class VolumeCalculator implements Calculator{
         }
         double avg = sum/barList.size();
         System.out.println("Average volume: "+avg);
+
+        return avg;
+
     }
 }

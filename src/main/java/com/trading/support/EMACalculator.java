@@ -6,8 +6,8 @@ import java.util.List;
 
 public class EMACalculator implements Calculator {
     @Override
-    public void calculate(List<Bar> barList) {
-
+    public double calculate(List<Bar> barList) {
+        return 0.0;
     }
     public Double calculate(List<Bar> barList, int period) {
         // Check if barList is smaller than the period

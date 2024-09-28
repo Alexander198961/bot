@@ -1,5 +1,6 @@
 import base.TestSetUp;
 
+import com.ib.client.Bar;
 import com.ib.client.Contract;
 import com.ib.client.Decimal;
 import com.ib.client.Order;
@@ -8,6 +9,8 @@ import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
 import com.trading.support.VolumeCalculator;
 import org.junit.Test;
+
+import java.util.List;
 
 public class OptionTest extends TestSetUp {
 
@@ -48,15 +51,20 @@ public class OptionTest extends TestSetUp {
         smaCalculator.calculateEMA(wrapper.getList(), 13);
     }
 
-    //@Test
+    @Test
     public void testVolumeMrkt() throws Exception{
+        final double percent = 1.5;
         Contract contract = new Contract();
-
-
-        m_client.reqHistoricalData(1000 + 10, new USStockContract("AMZN"), "", "200 D", "1 day", "TRADES", 1, 1, false, null);
+        m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "200 D", "1 day", "TRADES", 1, 1, false, null);
         Thread.sleep(3000);
         Calculator calculator = new VolumeCalculator();
-        calculator.calculate(wrapper.getList());
+        double averageVolume = calculator.calculate(wrapper.getList());
+        List<Bar> list = wrapper.getList();
+        double lastVolume = list.get(list.size() -1).volume().longValue();
+        if (lastVolume > percent * averageVolume){
+            System.out.println("Last volume is ===============" + lastVolume);
+        }
+        //calculator.calculate(wrapper.getList());
       //  SMACalculator smaCalculator = new SMACalculator();
         //smaCalculator.calculate(wrapper.getList(), 200);
         // System.out.printf("TESTTT#######@@@@@%s%n", );
