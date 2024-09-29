@@ -8,9 +8,18 @@ import com.trading.support.Calculator;
 import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
 import com.trading.support.VolumeCalculator;
+import com.trading.support.reader.TickerReader;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class OptionTest extends TestSetUp {
 
@@ -30,15 +39,38 @@ public class OptionTest extends TestSetUp {
 
 
     }
+
+   // @Test
+    public void testReadFile() throws IOException, URISyntaxException {
+
+        Path path = Paths.get(Objects.requireNonNull(getClass().getClassLoader()
+                .getResource("nasdaqlisted.txt")).toURI());
+
+        Stream<String> lines = Files.lines(path);
+        Stream<String> limited =  lines.limit(10);
+        List<String> tickers = new ArrayList<>();
+        limited.forEach(line ->{
+
+            tickers.add(line.split("\\|")[0]);
+        });
+        tickers.remove(0);
+        System.out.println(tickers);
+
+    }
     //@Test
     public void testSmaMrkt() throws Exception{
         Contract contract = new Contract();
-        m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "200 D", "1 day", "MIDPOINT", 1, 1, false, null);
+        m_client.reqHistoricalData(1000 + 10, new USStockContract("AMZN"), "", "200 D", "1 day", "MIDPOINT", 1, 1, false, null);
         Thread.sleep(3000);
        // Calculator calculator = new VolumeCalculator();
         //calculator.calculate(wrapper.getList());
+        List<Bar> list = wrapper.getList();
         EMACalculator smaCalculator = new EMACalculator();
-        smaCalculator.calculate(wrapper.getList(), 200);
+        double smaLastValue= smaCalculator.calculate(wrapper.getList(), 200);
+        double lastClosePrice = list.get(list.size() -1).close();
+        if(lastClosePrice> smaLastValue ){
+               System.out.println("sma value====");
+        }
        // System.out.printf("TESTTT#######@@@@@%s%n", );
     }
 
@@ -53,17 +85,25 @@ public class OptionTest extends TestSetUp {
 
     @Test
     public void testVolumeMrkt() throws Exception{
-        final double percent = 1.5;
-        Contract contract = new Contract();
-        m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "200 D", "1 day", "TRADES", 1, 1, false, null);
-        Thread.sleep(3000);
-        Calculator calculator = new VolumeCalculator();
-        double averageVolume = calculator.calculate(wrapper.getList());
-        List<Bar> list = wrapper.getList();
-        double lastVolume = list.get(list.size() -1).volume().longValue();
-        if (lastVolume > percent * averageVolume){
-            System.out.println("Last volume is ===============" + lastVolume);
+        TickerReader tickerReader = new TickerReader();
+        List<String> tickers = tickerReader.tickers();
+        final double percent = 1.2;
+        List <String> tickersMetCriteria = new ArrayList<>();
+        for(String ticker : tickers) {
+            m_client.reqHistoricalData(1000 + 10, new USStockContract(ticker), "", "200 D", "1 day", "TRADES", 1, 1, false, null);
+            Thread.sleep(1000);
+            Calculator calculator = new VolumeCalculator();
+            double averageVolume = calculator.calculate(wrapper.getList());
+            List<Bar> list = wrapper.getList();
+
+            double lastVolume = list.get(list.size() - 1).volume().longValue();
+            if (lastVolume > percent * averageVolume) {
+                tickersMetCriteria.add(ticker);
+               // System.out.println("Last volume is ===============" + lastVolume);
+            }
+
         }
+        System.out.println(tickersMetCriteria);
         //calculator.calculate(wrapper.getList());
       //  SMACalculator smaCalculator = new SMACalculator();
         //smaCalculator.calculate(wrapper.getList(), 200);
