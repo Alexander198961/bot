@@ -1,4 +1,16 @@
 package com.trading.scan;
 
-public class SmaScan {
+import com.ib.client.Bar;
+import com.trading.support.EMACalculator;
+
+import java.util.List;
+
+public class SmaScan extends Scan {
+    @Override
+    boolean criteriaIsMeet(List<Bar> list) {
+        EMACalculator smaCalculator = new EMACalculator();
+        double smaLastValue= smaCalculator.calculate(list, 200);
+        double lastClosePrice = list.get(list.size() -1).close();
+        return lastClosePrice > smaLastValue;
+    }
 }

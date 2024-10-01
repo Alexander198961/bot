@@ -2,6 +2,7 @@ package com.trading.support;
 
 import com.ib.client.Bar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EMACalculator implements Calculator {
@@ -32,25 +33,10 @@ public class EMACalculator implements Calculator {
         return (double) 0;
     }
 
-    public double calculateEMA(List<Bar> barList, int period) {
+    public List<Double> calculateEMA(List<Bar> barList, int period) {
         // Check if barList is smaller than the period
-        /*
-        if (barList.size() < period) {
-            System.out.println("Not enough data to calculate EMA.");
-            return;
-        }
 
-        double alpha = 2.0 / (period + 1);
-        double previousEMA = 0.0;
-
-        // Step 1: Calculate SMA for the first period as the initial EMA
-        double sum = 0.0;
-        for (int i = 0; i < period; i++) {
-            sum += barList.get(i).close(); // Assuming `getClose()` returns the closing price of the Bar
-        }
-        double sma = sum / period;
-         */
-        //double sma = sum / period;
+        List<Double> emaList = new ArrayList<>();
         double alpha = 2.0 / (period + 1);
         double previousEMA = 0.0;
         double sma = calculate(barList,period);
@@ -62,10 +48,11 @@ public class EMACalculator implements Calculator {
         for (int i = period; i < barList.size(); i++) {
             double currentPrice = barList.get(i).close();
             double currentEMA = (currentPrice * alpha) + (previousEMA * (1 - alpha));
+            emaList.add(currentEMA);
             System.out.println("EMA for day " + (i + 1) + ": " + currentEMA);
             previousEMA = currentEMA; // Update the previous EMA for the next iteration
         }
         System.out.println("EMA for day " + period + ": " + previousEMA);
-        return previousEMA;
+        return emaList;
     }
 }

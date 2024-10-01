@@ -4,6 +4,10 @@ import com.ib.client.Bar;
 import com.ib.client.Contract;
 import com.ib.client.Decimal;
 import com.ib.client.Order;
+import com.trading.scan.CrossScan;
+import com.trading.scan.PlaceOrderAction;
+import com.trading.scan.SaveTickerAction;
+import com.trading.scan.Scan;
 import com.trading.support.Calculator;
 import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
@@ -24,7 +28,7 @@ import java.util.stream.Stream;
 public class OptionTest extends TestSetUp {
 
 
-    //@Test
+   // @Test
     public void testcurrency() throws Exception{
         Contract eurusdContract = new Contract();
         eurusdContract.symbol("EUR");
@@ -74,7 +78,7 @@ public class OptionTest extends TestSetUp {
        // System.out.printf("TESTTT#######@@@@@%s%n", );
     }
 
-    //@Test
+   // @Test
     public void testEMA() throws Exception{
         Contract contract = new Contract();
         m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "200 D", "1 day", "MIDPOINT", 1, 1, false, null);
@@ -84,6 +88,15 @@ public class OptionTest extends TestSetUp {
     }
 
     @Test
+    public void scannerCross() throws InterruptedException {
+        //acmr axdx
+        TickerReader tickerReader = new TickerReader();
+        List<String> tickers = tickerReader.tickers();
+        Scan scan = new CrossScan(9,26);
+        scan.scan(wrapper, new PlaceOrderAction(wrapper));
+    }
+
+   // @Test
     public void testVolumeMrkt() throws Exception{
         TickerReader tickerReader = new TickerReader();
         List<String> tickers = tickerReader.tickers();

@@ -25,6 +25,7 @@ public class EWrapperImpl implements  EWrapper {
     }
 
     public void setList(List<Bar> list) {
+
         this.list = list;
     }
 
