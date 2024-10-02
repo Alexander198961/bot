@@ -1,7 +1,11 @@
-package com.trading.ftp;
+package com.trading.tickers;
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+
+import java.io.*;
 
 public class FtpDownloader {
-    /*
+
     private static final String FTP_SERVER = "ftp.nasdaqtrader.com";
     private static final String FILE_PATH = "/SymbolDirectory/nasdaqlisted.txt";
     private static final String LOCAL_FILE_PATH = "nasdaqlisted.txt";
@@ -28,6 +32,8 @@ public class FtpDownloader {
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, bytesRead);
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
             // Logout from the FTP server
@@ -62,5 +68,5 @@ public class FtpDownloader {
         }
     }
 
-     */
+
 }

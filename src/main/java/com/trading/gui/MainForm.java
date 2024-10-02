@@ -1,12 +1,7 @@
 package com.trading.gui;
 
-import com.ib.client.Bar;
 import com.trading.EWrapperImpl;
 import com.trading.scan.*;
-import com.trading.support.Calculator;
-import com.trading.support.VolumeCalculator;
-import com.trading.api.USStockContract;
-import com.trading.support.reader.TickerReader;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -19,7 +14,9 @@ import java.util.List;
 
 public class MainForm {
     private final EWrapperImpl wrapper;
-    public MainForm(EWrapperImpl wrapper){
+    private  List <String> tickers;
+    public MainForm(EWrapperImpl wrapper, List<String> tickers){
+        this.tickers = tickers;
         this.wrapper = wrapper;
     }
 
@@ -40,7 +37,7 @@ public class MainForm {
 
         // Create a button
         JButton showListButton = new JButton("Run Volume scanner");
-        JButton searchCross = new JButton("CrossEnterPoint");
+        JButton searchCross = new JButton("CrossEnterPoint search execute trade");
 
 
         // Create a panel to add the button
@@ -66,8 +63,15 @@ public class MainForm {
         shortEma.setText("12");
         JTextField longEma = new JTextField();
         longEma.setText("26");
+        JTextField capitalField = new JTextField();
+        capitalField.setText("10000");
+        JTextField riskPercentField = new JTextField();
+        riskPercentField.setText("1");
+        crossPanel.add(textFiledWithLabel("totalAmount", capitalField));
+        crossPanel.add(textFiledWithLabel("risk percent", riskPercentField));
         crossPanel.add(textFiledWithLabel("Short Ema", shortEma));
         crossPanel.add(textFiledWithLabel("Long Ema", longEma));
+
        // crossPanel.add(shortEma);
         //crossPanel.add(longEma);
         Border border = new LineBorder(Color.RED, 2);
@@ -85,10 +89,12 @@ public class MainForm {
         searchCross.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                double riskPercent = Double.parseDouble(riskPercentField.getText());
+                double capital = Double.parseDouble(capitalField.getText());
                 int shortEmaValue= Integer.parseInt(shortEma.getText());
                 int longEmaValue= Integer.parseInt(longEma.getText());
                 Scan scan = new CrossScan(shortEmaValue,longEmaValue);
-                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper));
+                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper,capital,riskPercent),tickers);
                 List<String>  messageList = new ArrayList<>();
                 messageList.add("Ticker is placed");
                 messageList.add(list.get(0));
@@ -101,7 +107,7 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 Scan scanner = new SmaScan();
-                updateTextArea(textArea, scanner.scan(wrapper, new SaveTickerAction()));
+                updateTextArea(textArea, scanner.scan(wrapper, new SaveTickerAction(), tickers));
             }
         });
         // Add an ActionListener to the button
@@ -109,7 +115,7 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Scan scanner = new VolumeScan();
-                List <String> tickerList= scanner.scan(wrapper, new SaveTickerAction());
+                List <String> tickerList= scanner.scan(wrapper, new SaveTickerAction(), tickers);
                 updateTextArea(textArea, tickerList);
 
             }

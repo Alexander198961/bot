@@ -13,8 +13,16 @@ import com.ib.client.*;
 
 //! [ewrapperimpl]
 public class EWrapperImpl implements  EWrapper {
-    //! [ewrapperimpl]
+    public int getErrorCode() {
+        return errorCode;
+    }
 
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    //! [ewrapperimpl]
+    int errorCode=0;
     //! [socket_declare]
     private EReaderSignal readerSignal;
     private EClientSocket clientSocket;
@@ -51,9 +59,21 @@ public class EWrapperImpl implements  EWrapper {
         return currentOrderId;
     }
 
+    public double getLastPrice() {
+        return lastPrice;
+    }
+
+    public void setLastPrice(double lastPrice) {
+        this.lastPrice = lastPrice;
+    }
+
+    double lastPrice;
     //! [tickprice]
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttrib attribs) {
+        if (field == TickType.BID.index()) {
+            lastPrice=price;
+        }
         System.out.println("Tick Price: " + EWrapperMsgGenerator.tickPrice( tickerId, field, price, attribs));
     }
     //! [tickprice]
@@ -382,6 +402,9 @@ public class EWrapperImpl implements  EWrapper {
     //! [error]
     @Override
     public void error(int id, int errorCode, String errorMsg, String advancedOrderRejectJson) {
+        if(!org.apache.commons.lang3.StringUtils.containsIgnoreCase(errorMsg,"warn")) {
+            this.errorCode = errorCode;
+        }
         String str = "Error. Id: " + id + ", Code: " + errorCode + ", Msg: " + errorMsg;
         if (advancedOrderRejectJson != null) {
             str += (", AdvancedOrderRejectJson: " + advancedOrderRejectJson);

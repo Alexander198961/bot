@@ -55,7 +55,7 @@ public class TickerReader {
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.split("\\|")[0];
-               // if(tickers.size()> 50) {
+               // if(tickers.size()> 150) {
                  //   break;
                 //}
                 tickers.add(line);

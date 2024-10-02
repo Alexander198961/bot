@@ -16,16 +16,22 @@ public abstract class Scan {
 
     abstract boolean criteriaIsMeet(List<Bar> list );
 
-    public List<String> scan(EWrapperImpl wrapper, Action action) {
+    public List<String> scan(EWrapperImpl wrapper, Action action, java.util.List<String> tickers ) {
         java.util.List<String> tickersMeetCriteria = new ArrayList<>();
-        TickerReader tickerReader = new TickerReader();
-        java.util.List<String> tickers = tickerReader.tickers();
+       // TickerReader tickerReader = new TickerReader();
+       // java.util.List<String> tickers = tickerReader.tickers();
        // tickers = new ArrayList<>();
-        //tickers.add("AIP");
+       // tickers.add("AEIS");
+        //tickers = new ArrayList<>();
+        //tickers.add("ADSE");
         for (String ticker : tickers) {
 
             if (Cache.cache.getIfPresent(ticker)==null) {
                 wrapper.setList(new ArrayList<>());
+                if(!wrapper.getClient().isConnected()){
+                    System.err.println("is not connected");
+                    break;
+                }
                 wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", "210 D", "1 day", "TRADES", 1, 1, false, null);
                 try {
                     Thread.sleep(1000);
