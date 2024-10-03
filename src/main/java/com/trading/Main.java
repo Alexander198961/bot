@@ -3,16 +3,16 @@ package com.trading;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
+import com.trading.config.GlobalConfiguration;
 import com.trading.gui.MainForm;
 import com.trading.support.reader.TickerReader;
 import com.trading.tickers.FtpDownloader;
-import com.trading.tickers.SP500Scraper;
+
+import com.trading.tickers.StockScarper;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 public class Main {
     static EClientSocket m_client;
@@ -21,12 +21,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Cache cache = new Cache();
         cache.init();
-        SP500Scraper sp500Scraper = new SP500Scraper();
-        List<String> sp500Tickers = sp500Scraper.fetch();
+        StockScarper stockScarper = new StockScarper();
+        List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
+        List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
         FtpDownloader ftpDownloader = new FtpDownloader();
-        ftpDownloader.download();
         TickerReader tickerReader = new TickerReader();
-        List<String> nasdaq = tickerReader.tickers();
+        List<String> nasdaq = tickerReader.tickers(ftpDownloader.downloadToText());
+        Map<String, List<String>> indexTickerStorage = new HashMap<>();
+        indexTickerStorage.put("SP500", sp500List);
+        indexTickerStorage.put("DOW", dowStocks);
+        indexTickerStorage.put("NASDAQ", nasdaq);
        // System.out.println("fetch==="+ sp500Scraper.fetch());
         /*
         Properties properties = new Properties();
@@ -42,8 +46,9 @@ public class Main {
         String host =properties.getProperty("host");
 
          */
-        String host="localhost";
-        int port=7496;
+        GlobalConfiguration globalConfiguration = new GlobalConfiguration();
+        String host= globalConfiguration.getHost();
+        int port=globalConfiguration.getPort();
         System.out.println("ib tws port="+ port);
         System.out.println("ib tws host="+ host);
         assert port>0;
@@ -59,9 +64,9 @@ public class Main {
             System.exit(10);
         }
 
-        sp500Tickers = new ArrayList<>();
-        sp500Tickers.add("BCOV");
-        MainForm mainForm = new MainForm(wrapper, sp500Tickers);
+       // sp500Tickers = new ArrayList<>();
+        //sp500Tickers.add("BCOV");
+        MainForm mainForm = new MainForm(wrapper, indexTickerStorage);
         mainForm.display();
 
 

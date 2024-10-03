@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class PlaceOrderAction  implements Action{
+public class PlaceOrderAction  extends Action{
     private double accountValue=10000;
     private double risk=1 ;
     public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk) {
@@ -27,11 +27,12 @@ public class PlaceOrderAction  implements Action{
 
     @Override
     public boolean execute(List<Bar> list, String symbol) {
+        Utils utils = new Utils();
         double accountValue= this.accountValue;
         double risk = this.risk;
         Contract contract = new USStockContract(symbol);
         wrapper.getClient().reqMktData(1000 + 44, contract, "", false, false, null);
-        pause(500);
+        utils.pause(500);
         double amountToPut = accountValue/100 * risk;
         DecimalFormat df = new DecimalFormat("#.##");
         //double price =list.get(list.size() -1).close();
@@ -56,17 +57,15 @@ public class PlaceOrderAction  implements Action{
             return false;
         }
         double stopPrice= price - price/100* 4;
-
         Order order = new Order();
         int orderId = 0 ;
         wrapper.getClient().reqIds(1);
-
         orderId = getOrderId();
         order.action("BUY");
         order.orderType("MKT");
         order.totalQuantity(Decimal.get(totalQty));
         wrapper.getClient().placeOrder(orderId, contract, order);
-        pause(1000);
+        utils.pause(1000);
         if (wrapper.getErrorCode()>0){
             System.out.println("PlaceOrderAction: error code: "+wrapper.getErrorCode());
             return false;
@@ -80,17 +79,11 @@ public class PlaceOrderAction  implements Action{
         stopPrice = Double.parseDouble(df.format(stopPrice));
         order.lmtPrice(stopPrice);
         wrapper.getClient().placeOrder(orderId+1, contract, order);
-        pause(1000);
+        utils.pause(1000);
         return true;
     }
 
-    private  void pause(int milliseconds){
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
     private Integer getOrderId(){
         Integer orderId = wrapper.getCurrentOrderId();

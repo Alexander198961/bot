@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SP500Scraper {
+public class StockScarper {
 
-    public List<String> fetch( ) throws IOException {
-        String url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies";
+    public List<String> fetch( String url, int index) throws IOException {
+        //String url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies";
 
         // Fetch the Wikipedia page
         Document doc = Jsoup.connect(url).get();
@@ -26,8 +26,8 @@ public class SP500Scraper {
         // Iterate over rows to extract the ticker symbols
         for (Element row : rows) {
             Elements cols = row.select("td");
-            if (cols.size() > 0) {
-                String ticker = cols.get(0).text();  // First column contains the ticker symbol
+            if (cols.size() > index) {
+                String ticker = cols.get(index).text();  // First column contains the ticker symbol
                 sp500Companies.add(ticker);
             }
         }

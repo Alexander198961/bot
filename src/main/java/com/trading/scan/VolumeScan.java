@@ -7,9 +7,14 @@ import com.trading.support.VolumeCalculator;
 import java.util.List;
 
 public class VolumeScan  extends Scan {
+    public VolumeScan(double percent) {
+        this.percent = percent;
+    }
+
+    private final double percent;
     @Override
     boolean criteriaIsMeet(List<Bar> list) {
-        final double percent = 1.8;
+        //final double percent = 1.8;
         Calculator calculator = new VolumeCalculator();
         double averageVolume = calculator.calculate(list);
         double lastVolume = list.get(list.size() - 1).volume().longValue();

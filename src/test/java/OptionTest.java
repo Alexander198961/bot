@@ -13,6 +13,7 @@ import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
 import com.trading.support.VolumeCalculator;
 import com.trading.support.reader.TickerReader;
+import com.trading.tickers.FtpDownloader;
 import com.trading.tickers.SP500Scraper;
 import org.junit.Test;
 
@@ -65,6 +66,12 @@ public class OptionTest extends TestSetUp {
         tickers.remove(0);
         System.out.println(tickers);
 
+    }
+    @Test
+    public void testFast(){
+        FtpDownloader ftpDownloader = new FtpDownloader();
+        ftpDownloader.downloadToText();
+        //System.out.println("fast===" + );
     }
     //@Test
     public void testSmaMrkt() throws Exception{

@@ -6,48 +6,62 @@ import com.trading.scan.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
 public class MainForm {
     private final EWrapperImpl wrapper;
-    private  List <String> tickers;
-    public MainForm(EWrapperImpl wrapper, List<String> tickers){
-        this.tickers = tickers;
+    private final Map <String,List<String>> storageIndexTicker;
+    public MainForm(EWrapperImpl wrapper, Map<String,List<String>> tickers){
+        this.storageIndexTicker = tickers;
         this.wrapper = wrapper;
     }
 
-    private JPanel textFiledWithLabel(String labelText, JTextField textField){
+    private JPanel componentWithLabel(String labelText, JComponent textField){
         JPanel panel = new JPanel(new FlowLayout());
         JLabel jLabel = new JLabel(labelText);
         panel.add(jLabel);
-        //JTextField textField = new JTextField(10);
-        //textField.setText(text);
         panel.add(textField);
         return panel;
     }
     public void display() {
         JFrame frame = new JFrame("Trading scanner");
+        JList<String> stockIndexesListUI = new JList(storageIndexTicker.keySet().toArray());
+        stockIndexesListUI.setSelectedIndex(0);
+        stockIndexesListUI.setVisibleRowCount(1);
+        JPanel panelIndexChooser = componentWithLabel("Select index",stockIndexesListUI);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 800);
         frame.setLayout(new BorderLayout());
+        frame.add(panelIndexChooser);
+      //  frame.add(stockIndexesListUI);
 
         // Create a button
-        JButton showListButton = new JButton("Run Volume scanner");
+        JButton showVolumeButton = new JButton("Run Volume scanner");
+        JPanel volumeConfigurationPanel = new JPanel(new BorderLayout());
+        JTextField volumeSettings = new JTextField();
+        volumeSettings.setText("1.8");
+        volumeConfigurationPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        volumeConfigurationPanel.add(volumeSettings);
+        volumeConfigurationPanel.add(componentWithLabel("Volume settings",showVolumeButton));
         JButton searchCross = new JButton("CrossEnterPoint search execute trade");
 
 
         // Create a panel to add the button
         JPanel panel = new JPanel();
+        panel.add(panelIndexChooser);
         JPanel crossPanel = new JPanel();
 
         JButton stockAboveSmaSearchButton = new JButton("Stock above 200 sma");
        // frame.add(stockAboveSmaSearchButton, BorderLayout.SOUTH);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(showListButton);
+        panel.add(volumeConfigurationPanel);
+        panel.add(volumeSettings);
+        //panel.add(showVolumeButton);
         panel.add(stockAboveSmaSearchButton);
         crossPanel.setLayout(new BoxLayout(crossPanel, BoxLayout.Y_AXIS));
         //JTextField shortEma = new JTextField(10);
@@ -67,10 +81,10 @@ public class MainForm {
         capitalField.setText("10000");
         JTextField riskPercentField = new JTextField();
         riskPercentField.setText("1");
-        crossPanel.add(textFiledWithLabel("totalAmount", capitalField));
-        crossPanel.add(textFiledWithLabel("risk percent", riskPercentField));
-        crossPanel.add(textFiledWithLabel("Short Ema", shortEma));
-        crossPanel.add(textFiledWithLabel("Long Ema", longEma));
+        crossPanel.add(componentWithLabel("totalAmount", capitalField));
+        crossPanel.add(componentWithLabel("risk percent", riskPercentField));
+        crossPanel.add(componentWithLabel("Short Ema", shortEma));
+        crossPanel.add(componentWithLabel("Long Ema", longEma));
 
        // crossPanel.add(shortEma);
         //crossPanel.add(longEma);
@@ -94,31 +108,24 @@ public class MainForm {
                 int shortEmaValue= Integer.parseInt(shortEma.getText());
                 int longEmaValue= Integer.parseInt(longEma.getText());
                 Scan scan = new CrossScan(shortEmaValue,longEmaValue);
-                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper,capital,riskPercent),tickers);
+                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper,capital,riskPercent),storageIndexTicker.get(stockIndexesListUI.getSelectedValue()));
                 List<String>  messageList = new ArrayList<>();
-                messageList.add("Ticker is placed");
                 messageList.add(list.get(0));
                 updateTextArea(textArea,messageList);
             }
         });
 
-        stockAboveSmaSearchButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                Scan scanner = new SmaScan();
-                updateTextArea(textArea, scanner.scan(wrapper, new SaveTickerAction(), tickers));
-            }
+        stockAboveSmaSearchButton.addActionListener(actionEvent -> {
+            Scan scanner = new SmaScan();
+            updateTextArea(textArea, scanner.scan(wrapper, new SaveTickerAction(), storageIndexTicker.get(stockIndexesListUI.getSelectedValue())));
         });
         // Add an ActionListener to the button
-        showListButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Scan scanner = new VolumeScan();
-                List <String> tickerList= scanner.scan(wrapper, new SaveTickerAction(), tickers);
-                updateTextArea(textArea, tickerList);
+        showVolumeButton.addActionListener(e -> {
+            Double volumePercent = Double.valueOf(volumeSettings.getText());
+            Scan scanner = new VolumeScan(volumePercent);
+            List <String> tickerList= scanner.scan(wrapper, new SaveTickerAction(), storageIndexTicker.get(stockIndexesListUI.getSelectedValue()));
+            updateTextArea(textArea, tickerList);
 
-            }
         });
 
         // Make the frame visible

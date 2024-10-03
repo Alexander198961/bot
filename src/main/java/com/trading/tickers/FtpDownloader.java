@@ -1,8 +1,11 @@
 package com.trading.tickers;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.io.*;
 
 import java.io.*;
+import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 
 public class FtpDownloader {
 
@@ -10,7 +13,7 @@ public class FtpDownloader {
     private static final String FILE_PATH = "/SymbolDirectory/nasdaqlisted.txt";
     private static final String LOCAL_FILE_PATH = "nasdaqlisted.txt";
 
-    public void download(){
+    public void download() {
         FTPClient ftpClient = new FTPClient();
 
         try {
@@ -55,6 +58,27 @@ public class FtpDownloader {
         }
     }
 
+    public String downloadToText() {
+        FTPClient ftpClient = new FTPClient();
+        String result = "";
+
+            // Connect and login to the FTP server
+        try {
+            ftpClient.connect(FTP_SERVER);
+
+            ftpClient.enterLocalPassiveMode();
+            ftpClient.login("anonymous", "guest");
+            // Set file type to ASCII (for text files)
+            ftpClient.setFileType(FTP.ASCII_FILE_TYPE);
+            result = IOUtils.toString(ftpClient.retrieveFileStream(FILE_PATH), StandardCharsets.UTF_8);
+
+        } catch (IOException e) {System.err.println(e);
+           result = result;
+        }
+        return result;
+
+    }
+
     private static void readNasdaqListedFile(String filePath) {
         File file = new File(filePath);
 
@@ -67,6 +91,7 @@ public class FtpDownloader {
             e.printStackTrace();
         }
     }
-
-
 }
+
+
+
