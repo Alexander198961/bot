@@ -10,7 +10,7 @@ public class FtpDownloader {
     private static final String FILE_PATH = "/SymbolDirectory/nasdaqlisted.txt";
     private static final String LOCAL_FILE_PATH = "nasdaqlisted.txt";
 
-    public static void main(String[] args) {
+    public void download(){
         FTPClient ftpClient = new FTPClient();
 
         try {

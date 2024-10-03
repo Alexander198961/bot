@@ -4,6 +4,8 @@ import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
 import com.trading.gui.MainForm;
+import com.trading.support.reader.TickerReader;
+import com.trading.tickers.FtpDownloader;
 import com.trading.tickers.SP500Scraper;
 
 import java.io.FileInputStream;
@@ -21,6 +23,10 @@ public class Main {
         cache.init();
         SP500Scraper sp500Scraper = new SP500Scraper();
         List<String> sp500Tickers = sp500Scraper.fetch();
+        FtpDownloader ftpDownloader = new FtpDownloader();
+        ftpDownloader.download();
+        TickerReader tickerReader = new TickerReader();
+        List<String> nasdaq = tickerReader.tickers();
        // System.out.println("fetch==="+ sp500Scraper.fetch());
         /*
         Properties properties = new Properties();
