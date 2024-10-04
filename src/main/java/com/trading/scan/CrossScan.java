@@ -6,9 +6,14 @@ import com.trading.support.EMACalculator;
 import java.util.List;
 
 public class CrossScan extends Scan {
-    public CrossScan(int SHORT, int LONG) {
+
+    private double bellowEma = 0.0;
+
+    public CrossScan(int SHORT, int LONG, double bellowEma) {
         this.SHORT = SHORT;
         this.LONG = LONG;
+        this.bellowEma = bellowEma;
+
     }
 
     int SHORT;
@@ -17,7 +22,7 @@ public class CrossScan extends Scan {
     @Override
     boolean criteriaIsMeet(List<Bar> list) {
         // int SHORT = 12;
-        //int LONG = 26;
+        // int LONG = 26;
         int EMA_200 = 200;
         EMACalculator calculator = new EMACalculator();
         List<Double> smallEmaList = calculator.calculateEMA(list, SHORT);
@@ -32,14 +37,15 @@ public class CrossScan extends Scan {
         }
         double ema200Value = ema200List.get(ema200Size - 1);
         double price = list.get(list.size() - 1).close();
-        if (smallEmaList.get(smallEmaSize - 1) > largeEmaList.get(largeEmaSize - 1) && ((ema200Value - ema200Value / 100 * 4.1) < price)) {
+        if (smallEmaList.get(smallEmaSize - 1) > largeEmaList.get(largeEmaSize - 1) && ((ema200Value - ema200Value / 100 * bellowEma) < price)) {
 
 
             return largeEmaList.get(largeEmaSize - 2) > smallEmaList.get(smallEmaSize - 2);
-            // return largeEmaList.get(largeEmaSize - 2) > smallEmaList.get(smallEmaSize - 2);
+
 
         }
         return false;
+
 
     }
 }

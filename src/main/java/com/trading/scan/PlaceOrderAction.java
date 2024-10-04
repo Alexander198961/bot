@@ -7,90 +7,98 @@ import com.ib.client.Order;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class PlaceOrderAction  extends Action{
-    private double accountValue=10000;
-    private double risk=1 ;
-    public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk) {
+public class PlaceOrderAction extends Action {
+    private double accountValue = 10000;
+    private double risk = 1;
+    private final double stopPercent;
+
+    public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk, double stopPercent) {
         this.wrapper = eWrapperImpl;
         this.accountValue = accountValue;
         this.risk = risk;
+        this.stopPercent = stopPercent;
 
 
     }
 
+    ;
 
     private final EWrapperImpl wrapper;
 
     @Override
     public boolean execute(List<Bar> list, String symbol) {
         Utils utils = new Utils();
-        double accountValue= this.accountValue;
+        int orderId = 0;
+        double accountValue = this.accountValue;
         double risk = this.risk;
+        wrapper.getClient().reqIds(1);
+        wrapper.setLastPrice(0);
+        orderId = getOrderId();
         Contract contract = new USStockContract(symbol);
-        wrapper.getClient().reqMktData(1000 + 44, contract, "", false, false, null);
-        utils.pause(500);
-        double amountToPut = accountValue/100 * risk;
+        wrapper.getClient().reqMktData(orderId, contract, "", false, false, null);
+        utils.pause(1000);
+        double amountToPut = accountValue / 100 * risk;
         DecimalFormat df = new DecimalFormat("#.##");
         //double price =list.get(list.size() -1).close();
         double price = wrapper.getLastPrice();
-        if(price ==0 ){
-            price = list.get(list.size() -1).close();
+        if (price == 0) {
+            return false;
+            //price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
-        double totalQty = amountToPut/price;
+        double totalQty = amountToPut / price;
         wrapper.setErrorCode(0);
-        if(totalQty>0){
-            totalQty = (int)totalQty;
-        }
-        else{
+        if (totalQty > 0) {
+            totalQty = (int) totalQty;
+        } else {
             // todo fix it
             System.out.println("Shares price is higher than amount could be allocated");
             return false;
             //totalQty = Double.parseDouble(df1.format( amountToPut/price));
         }
-        if (totalQty <1){
+        if (totalQty < 1) {
             System.out.println("Shares price is higher than amount could be allocated");
             return false;
         }
-        double stopPrice= price - price/100* 4;
+        double stopPrice = price - price / 100 * stopPercent;
         Order order = new Order();
-        int orderId = 0 ;
-        wrapper.getClient().reqIds(1);
-        orderId = getOrderId();
         order.action("BUY");
         order.orderType("MKT");
         order.totalQuantity(Decimal.get(totalQty));
+        orderId = orderId + 1;
         wrapper.getClient().placeOrder(orderId, contract, order);
         utils.pause(1000);
-        if (wrapper.getErrorCode()>0){
-            System.out.println("PlaceOrderAction: error code: "+wrapper.getErrorCode());
+        if (wrapper.getErrorCode() > 0) {
+            System.out.println("PlaceOrderAction: error code: " + wrapper.getErrorCode());
             return false;
         }
-        wrapper.nextValidId(orderId);
-        orderId = getOrderId();
+
+        utils.pause(2000);
+        orderId = orderId + 1;
+        //wrapper.nextValidId(orderId);
+        //orderId = getOrderId();
         order = new Order();
         order.action("SELL");
-        order.orderType("LMT");
+        order.orderType("STOP");
         order.totalQuantity(Decimal.get(totalQty));
         stopPrice = Double.parseDouble(df.format(stopPrice));
         order.lmtPrice(stopPrice);
-        wrapper.getClient().placeOrder(orderId+1, contract, order);
+        wrapper.getClient().placeOrder(orderId + 1, contract, order);
         utils.pause(1000);
         return true;
     }
 
 
-
-    private Integer getOrderId(){
+    private Integer getOrderId() {
         Integer orderId = wrapper.getCurrentOrderId();
         orderId++;
         return orderId;
     }
-    private void placeOrder(){
+
+    private void placeOrder() {
 
 
     }

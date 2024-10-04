@@ -30,8 +30,8 @@ public class MainForm {
     }
     public void display() {
         JFrame frame = new JFrame("Trading scanner");
-        JList<String> stockIndexesListUI = new JList(storageIndexTicker.keySet().toArray());
-        stockIndexesListUI.setSelectedIndex(0);
+        JList stockIndexesListUI = new JList(storageIndexTicker.keySet().toArray());
+        stockIndexesListUI.setSelectedIndex(1);
         stockIndexesListUI.setVisibleRowCount(1);
         JPanel panelIndexChooser = componentWithLabel("Select index",stockIndexesListUI);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,6 +45,7 @@ public class MainForm {
         JPanel volumeConfigurationPanel = new JPanel(new BorderLayout());
         JTextField volumeSettings = new JTextField();
         volumeSettings.setText("1.8");
+        volumeSettings.setColumns(5);
         volumeConfigurationPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         volumeConfigurationPanel.add(volumeSettings);
         volumeConfigurationPanel.add(componentWithLabel("Volume settings",showVolumeButton));
@@ -74,17 +75,29 @@ public class MainForm {
         crossPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         crossPanel.add(searchCross);
         JTextField shortEma = new JTextField();
+        shortEma.setColumns(4);
         shortEma.setText("12");
         JTextField longEma = new JTextField();
         longEma.setText("26");
+        longEma.setColumns(4);
         JTextField capitalField = new JTextField();
         capitalField.setText("10000");
+        capitalField.setColumns(8);
         JTextField riskPercentField = new JTextField();
         riskPercentField.setText("1");
+        riskPercentField.setColumns(4);
+        JTextField stopPercentField = new JTextField();
+        stopPercentField.setText("4");
+        stopPercentField.setColumns(4);
+        JTextField bellowLargeEma = new JTextField();
+        bellowLargeEma.setText("5");
+        bellowLargeEma.setColumns(4);
         crossPanel.add(componentWithLabel("totalAmount", capitalField));
-        crossPanel.add(componentWithLabel("risk percent", riskPercentField));
+        crossPanel.add(componentWithLabel("risk %", riskPercentField));
         crossPanel.add(componentWithLabel("Short Ema", shortEma));
         crossPanel.add(componentWithLabel("Long Ema", longEma));
+        crossPanel.add(componentWithLabel("stop %", stopPercentField));
+        crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma));
 
        // crossPanel.add(shortEma);
         //crossPanel.add(longEma);
@@ -104,11 +117,13 @@ public class MainForm {
             @Override
             public void actionPerformed(ActionEvent e) {
                 double riskPercent = Double.parseDouble(riskPercentField.getText());
+                double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
+                double stopPercent = Double.parseDouble(stopPercentField.getText());
                 double capital = Double.parseDouble(capitalField.getText());
                 int shortEmaValue= Integer.parseInt(shortEma.getText());
                 int longEmaValue= Integer.parseInt(longEma.getText());
-                Scan scan = new CrossScan(shortEmaValue,longEmaValue);
-                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper,capital,riskPercent),storageIndexTicker.get(stockIndexesListUI.getSelectedValue()));
+                Scan scan = new CrossScan(shortEmaValue,longEmaValue, bellowEmaPercent);
+                List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper, capital,riskPercent,  stopPercent),storageIndexTicker.get(stockIndexesListUI.getSelectedValue()));
                 List<String>  messageList = new ArrayList<>();
                 messageList.add(list.get(0));
                 updateTextArea(textArea,messageList);
@@ -121,7 +136,7 @@ public class MainForm {
         });
         // Add an ActionListener to the button
         showVolumeButton.addActionListener(e -> {
-            Double volumePercent = Double.valueOf(volumeSettings.getText());
+            double volumePercent = Double.parseDouble(volumeSettings.getText());
             Scan scanner = new VolumeScan(volumePercent);
             List <String> tickerList= scanner.scan(wrapper, new SaveTickerAction(), storageIndexTicker.get(stockIndexesListUI.getSelectedValue()));
             updateTextArea(textArea, tickerList);

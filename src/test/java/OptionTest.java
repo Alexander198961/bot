@@ -14,7 +14,6 @@ import com.trading.support.EMACalculator;
 import com.trading.support.VolumeCalculator;
 import com.trading.support.reader.TickerReader;
 import com.trading.tickers.FtpDownloader;
-import com.trading.tickers.SP500Scraper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -101,16 +100,16 @@ public class OptionTest extends TestSetUp {
 
    // @Test
     public void sp500ticker() throws IOException {
-        SP500Scraper sp500Scraper = new SP500Scraper();
-        System.out.println("fetch==="+ sp500Scraper.fetch());
+        //SP500Scraper sp500Scraper = new SP500Scraper();
+        //System.out.println("fetch==="+ sp500Scraper.fetch());
     }
    // @Test
     public void scannerCross() throws InterruptedException {
         //acmr axdx
-        TickerReader tickerReader = new TickerReader();
-        List<String> tickers = tickerReader.tickers();
-        Scan scan = new CrossScan(9,26);
-        scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 1), tickers);
+        //TickerReader tickerReader = new TickerReader();
+        //List<String> tickers = tickerReader.tickers();
+       // Scan scan = new CrossScan(9,26);
+       // scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 1), tickers);
     }
 
    // @Test

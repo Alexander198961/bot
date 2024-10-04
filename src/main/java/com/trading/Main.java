@@ -28,6 +28,8 @@ public class Main {
         TickerReader tickerReader = new TickerReader();
         List<String> nasdaq = tickerReader.tickers(ftpDownloader.downloadToText());
         Map<String, List<String>> indexTickerStorage = new HashMap<>();
+        //sp500List =new ArrayList<>();
+        //sp500List.add("BANL");
         indexTickerStorage.put("SP500", sp500List);
         indexTickerStorage.put("DOW", dowStocks);
         indexTickerStorage.put("NASDAQ", nasdaq);
@@ -52,15 +54,16 @@ public class Main {
         System.out.println("ib tws port="+ port);
         System.out.println("ib tws host="+ host);
         assert port>0;
-        assert !host.equals("");
+        assert !host.isEmpty();
         wrapper = new EWrapperImpl();
         IBSignalHandler ibSignalHandler = new IBSignalHandler(wrapper, port, host);
         ibSignalHandler.run();
         m_client = wrapper.getClient();
+        assert m_client.isConnected();
         if (m_client.isConnected()) {
             System.out.println("Connected to TWS");
         }else{
-            System.out.println("Couldnot connect");
+            System.out.println("Couldn't connect");
             System.exit(10);
         }
 
