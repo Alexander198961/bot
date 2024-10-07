@@ -26,7 +26,7 @@ public class EMACalculator implements Calculator {
             }
             // Calculate the average
             double sma = sum / period;
-            System.out.println("SMA for day " + (i + period) + ": " + sma);
+            //System.out.println("SMA for day " + (i + period) + ": " + sma);
             return sma;
 
         }

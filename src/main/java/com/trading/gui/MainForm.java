@@ -92,10 +92,12 @@ public class MainForm {
         JTextField bellowLargeEma = new JTextField();
         bellowLargeEma.setText("5");
         bellowLargeEma.setColumns(4);
+        JTextField largeEma = new JTextField();
+        largeEma.setText("26");
         crossPanel.add(componentWithLabel("totalAmount", capitalField));
         crossPanel.add(componentWithLabel("risk %", riskPercentField));
         crossPanel.add(componentWithLabel("Short Ema", shortEma));
-        crossPanel.add(componentWithLabel("Long Ema", longEma));
+        crossPanel.add(componentWithLabel("Big Ema", longEma));
         crossPanel.add(componentWithLabel("stop %", stopPercentField));
         crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma));
 

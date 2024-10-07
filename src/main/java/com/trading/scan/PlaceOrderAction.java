@@ -1,9 +1,6 @@
 package com.trading.scan;
 
-import com.ib.client.Bar;
-import com.ib.client.Contract;
-import com.ib.client.Decimal;
-import com.ib.client.Order;
+import com.ib.client.*;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
 
@@ -66,7 +63,7 @@ public class PlaceOrderAction extends Action {
         double stopPrice = price - price / 100 * stopPercent;
         Order order = new Order();
         order.action("BUY");
-        order.orderType("MKT");
+        order.orderType(OrderType.MKT);
         order.totalQuantity(Decimal.get(totalQty));
         orderId = orderId + 1;
         wrapper.getClient().placeOrder(orderId, contract, order);
@@ -78,14 +75,12 @@ public class PlaceOrderAction extends Action {
 
         utils.pause(2000);
         orderId = orderId + 1;
-        //wrapper.nextValidId(orderId);
-        //orderId = getOrderId();
         order = new Order();
         order.action("SELL");
-        order.orderType("STOP");
+        order.orderType(OrderType.STP);
         order.totalQuantity(Decimal.get(totalQty));
         stopPrice = Double.parseDouble(df.format(stopPrice));
-        order.lmtPrice(stopPrice);
+        order.auxPrice(stopPrice);
         wrapper.getClient().placeOrder(orderId + 1, contract, order);
         utils.pause(1000);
         return true;

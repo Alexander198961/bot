@@ -114,6 +114,7 @@ public class OptionTest extends TestSetUp {
 
    // @Test
     public void testVolumeMrkt() throws Exception{
+        /*
         TickerReader tickerReader = new TickerReader();
         List<String> tickers = tickerReader.tickers();
         final double percent = 1.2;
@@ -137,6 +138,8 @@ public class OptionTest extends TestSetUp {
       //  SMACalculator smaCalculator = new SMACalculator();
         //smaCalculator.calculate(wrapper.getList(), 200);
         // System.out.printf("TESTTT#######@@@@@%s%n", );
+
+         */
     }
 
 

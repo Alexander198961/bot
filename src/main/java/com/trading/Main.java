@@ -1,18 +1,16 @@
 package com.trading;
 
-import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
 import com.trading.config.GlobalConfiguration;
 import com.trading.gui.MainForm;
 import com.trading.support.reader.TickerReader;
-import com.trading.tickers.FtpDownloader;
-
 import com.trading.tickers.StockScarper;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
     static EClientSocket m_client;
@@ -23,16 +21,16 @@ public class Main {
         cache.init();
         StockScarper stockScarper = new StockScarper();
         List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
-        List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
-        FtpDownloader ftpDownloader = new FtpDownloader();
+        //List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
+       // FtpDownloader ftpDownloader = new FtpDownloader();
         TickerReader tickerReader = new TickerReader();
-        List<String> nasdaq = tickerReader.tickers(ftpDownloader.downloadToText());
+        //List<String> nasdaq = tickerReader.tickers(ftpDownloader.downloadToText());
         Map<String, List<String>> indexTickerStorage = new HashMap<>();
         //sp500List =new ArrayList<>();
         //sp500List.add("BANL");
         indexTickerStorage.put("SP500", sp500List);
-        indexTickerStorage.put("DOW", dowStocks);
-        indexTickerStorage.put("NASDAQ", nasdaq);
+       // indexTickerStorage.put("DOW", dowStocks);
+        //indexTickerStorage.put("NASDAQ", nasdaq);
        // System.out.println("fetch==="+ sp500Scraper.fetch());
         /*
         Properties properties = new Properties();
