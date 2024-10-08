@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 public class OptionTest extends TestSetUp {
 
 
-   // @Test
+    //@Test
     public void testcurrency() throws Exception{
         Contract eurusdContract = new Contract();
         eurusdContract.symbol("EUR");
@@ -66,7 +66,7 @@ public class OptionTest extends TestSetUp {
         System.out.println(tickers);
 
     }
-    @Test
+    //@Test
     public void testFast(){
         FtpDownloader ftpDownloader = new FtpDownloader();
         ftpDownloader.downloadToText();
@@ -89,11 +89,14 @@ public class OptionTest extends TestSetUp {
        // System.out.printf("TESTTT#######@@@@@%s%n", );
     }
 
-   // @Test
+    @Test
     public void testEMA() throws Exception{
         Contract contract = new Contract();
-        m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "200 D", "1 day", "MIDPOINT", 1, 1, false, null);
+        System.out.println("STARETEDD");
+        assert  m_client.isConnected();
+        m_client.reqHistoricalData(1000 + 10, new USStockContract("SMCI"), "", "40 D", "1 hour", "MIDPOINT", 1, 1, false, null);
         Thread.sleep(3000);
+        System.out.println("size===="+wrapper.getList().size());
         EMACalculator smaCalculator = new EMACalculator();
         smaCalculator.calculateEMA(wrapper.getList(), 13);
     }

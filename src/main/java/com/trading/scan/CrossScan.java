@@ -9,25 +9,27 @@ public class CrossScan extends Scan {
 
     private double bellowEma = 0.0;
 
-    public CrossScan(int SHORT, int LONG, double bellowEma) {
+    public CrossScan(int SHORT, int LONG, double bellowEma, int LARGE_EMA) {
         this.SHORT = SHORT;
         this.LONG = LONG;
         this.bellowEma = bellowEma;
+        this.LARGE_EMA =LARGE_EMA;
 
     }
 
     int SHORT;
     int LONG;
+    int LARGE_EMA;
 
     @Override
     boolean criteriaIsMeet(List<Bar> list) {
         // int SHORT = 12;
         // int LONG = 26;
-        int EMA_200 = 200;
+        //LARGE_EMA = 200;
         EMACalculator calculator = new EMACalculator();
         List<Double> smallEmaList = calculator.calculateEMA(list, SHORT);
         List<Double> largeEmaList = calculator.calculateEMA(list, LONG);
-        List<Double> ema200List = calculator.calculateEMA(list, EMA_200);
+        List<Double> ema200List = calculator.calculateEMA(list, LARGE_EMA);
         int smallEmaSize = smallEmaList.size();
         int largeEmaSize = largeEmaList.size();
         int ema200Size = ema200List.size();
