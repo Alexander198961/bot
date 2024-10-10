@@ -5,6 +5,7 @@ import com.ib.controller.Account;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
 import com.trading.cache.Cache;
+import com.trading.config.RequestConfiguration;
 import com.trading.support.Calculator;
 import com.trading.support.VolumeCalculator;
 import com.trading.support.reader.TickerReader;
@@ -25,8 +26,7 @@ public abstract class Scan {
     }
 
 
-    public List<String> scan(EWrapperImpl wrapper, Action action, List<String> tickers ) {
-
+    public List<String> scan(EWrapperImpl wrapper, Action action, List<String> tickers , RequestConfiguration requestConfiguration) {
 
         List<String> tickersMeetCriteria = new ArrayList<>();
         Utils utils = new Utils();
@@ -34,47 +34,50 @@ public abstract class Scan {
             SaveTickerAction saveTickerAction = (SaveTickerAction) action;
             saveTickerAction.setTicker(tickersMeetCriteria);
         }
-        for (String ticker : tickers)
-
-
-            if (Cache.cache.getIfPresent(ticker)==null) {
+        for (String ticker : tickers) {
+            if (ticker == null || ticker.isEmpty()) {
+                continue;
+            }
+            // todo use cache ?
+            if (Cache.cache.getIfPresent(ticker) == null) {
                 wrapper.setList(new ArrayList<>());
-                if(!wrapper.getClient().isConnected()){
+                if (!wrapper.getClient().isConnected()) {
                     System.err.println("is not connected");
                     break;
                 }
-                wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", "210 D", "1 day", "TRADES", 1, 1, false, null);
+                wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", "210 D", requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
                 utils.pause(1000);
-                if(!utils.isConnected(wrapper)){
+                if (!utils.isConnected(wrapper)) {
                     tickersMeetCriteria.add("Not connected");
                 }
                 List<Bar> list = wrapper.getList();
                 if (isListValid(list, ticker)) {
                     continue;
                 }
-                if(check(list,ticker,action, tickersMeetCriteria)!= null){
+                if (check(list, ticker, action, tickersMeetCriteria) != null) {
                     return tickersMeetCriteria;
                 }
 
 
+            } else {
 
-
-            }
-            else {
                 System.out.println("read from cache===");
-                List<Bar> list = Cache.cache.getIfPresent(ticker);
+                List<Bar> list = (List<Bar>) Cache.cache.getIfPresent(ticker);
                 wrapper.setList(new ArrayList<>());
-                if(check(list,ticker,action, tickersMeetCriteria)!= null){
-                     return tickersMeetCriteria;
-                 }
+                if (check(list, ticker, action, tickersMeetCriteria) != null) {
+                    return tickersMeetCriteria;
+                }
+
 
             }
+        }
         if (tickersMeetCriteria.isEmpty()) {
             tickersMeetCriteria.add("No tickers are found");
         }
 
         return tickersMeetCriteria;
         }
+
 
     public List<String> check(List<Bar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
         if (isListValid(list, ticker)) {

@@ -1,12 +1,20 @@
 package com.trading.gui;
 
 import com.trading.EWrapperImpl;
+import com.trading.cache.Cache;
+import com.trading.config.EmaConfiguration;
+import com.trading.config.RequestConfiguration;
+import com.trading.config.TradeConfiguration;
 import com.trading.scan.*;
+import com.trading.scheduler.TaskScheduler;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -15,42 +23,116 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 public class MainForm {
-    private final EWrapperImpl wrapper;
-    private final Map <String,List<String>> storageIndexTicker;
-    public MainForm(EWrapperImpl wrapper, Map<String,List<String>> tickers){
-        this.storageIndexTicker = tickers;
-        this.wrapper = wrapper;
-    }
 
-    private JPanel componentWithLabel(String labelText, JComponent textField){
+
+    private JTextField riskPercentField = new JTextField();
+    private JTextField bellowLargeEma = new JTextField();
+    private JTextField stopPercentField = new JTextField();
+    private JTextField capitalField = new JTextField();
+    private JTextField shortEma = new JTextField();
+    private String [] tickersArray = new String[5];
+    private JTextField longEma = new JTextField();
+    private JTextField largeEmaTextField = new JTextField();
+    private final JList barSizeUiList = new JList<>(new String[]{"1 day", "1 hour", "4 hours", "1 min", "1 day", "1 week", "1 month"});
+
+    private JPanel componentWithLabel(String labelText, JComponent textField, JComponent additionalComponent){
         JPanel panel = new JPanel(new FlowLayout());
         JLabel jLabel = new JLabel(labelText);
         panel.add(jLabel);
         panel.add(textField);
+        if(additionalComponent != null){
+            panel.add(additionalComponent);
+        }
         return panel;
+    }
+
+    private  void checkboxAddListener(JCheckBox checkBox){
+        checkBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Toggle the checkbox state and update text
+                boolean isSelected = checkBox.isSelected();
+                checkBox.setText(isSelected ? "ON" : "OFF");
+            }
+        });
+    }
+
+    private void update(){
+        double riskPercent = Double.parseDouble(riskPercentField.getText());
+        double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
+        double stopPercent = Double.parseDouble(stopPercentField.getText());
+        double capital = Double.parseDouble(capitalField.getText());
+        int shortEmaValue= Integer.parseInt(shortEma.getText());
+        int longEmaValue= Integer.parseInt(longEma.getText());
+        int largeEma = Integer.parseInt(largeEmaTextField.getText());
+        EmaConfiguration emaConfiguration = new EmaConfiguration();
+        emaConfiguration.setLargeEma(largeEma);
+        emaConfiguration.setBellowEmaPercent(bellowEmaPercent);
+        emaConfiguration.setLongEmaValue(longEmaValue);
+        emaConfiguration.setShortEmaValue(shortEmaValue);
+        TradeConfiguration tradeConfiguration = new TradeConfiguration();
+        tradeConfiguration.setCapital(capital);
+        tradeConfiguration.setRiskPercent(riskPercent);
+        tradeConfiguration.setStopPercent(stopPercent);
+        String selectedBar = barSizeUiList.getSelectedValue().toString();
+        RequestConfiguration requestConfiguration = new RequestConfiguration();
+        requestConfiguration.setBarSize(selectedBar);
+        Cache.cache.put(Cache.Keys.RequestConfig.name(), requestConfiguration);
+        Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
+        Cache.cache.put(Cache.Keys.TradeConfig.name(), tradeConfiguration);
+        Cache.cache.put(Cache.Keys.EmaConfig.name(), emaConfiguration);
+
+        //Cache.cache.put("emaConfig", emaConfiguration);
+        //List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper, capital,riskPercent,  stopPercent), Arrays.asList(tickersArray));
+
+        //List<String>  messageList = new ArrayList<>();
+        //messageList.add(list.get(0));
+
+        //taskScheduler.run();
+        //updateTextArea(textArea,messageList);
     }
     public void display() {
         JFrame frame = new JFrame("Trading scanner");
-
-
-
+        //Object[][] data  = new Object[6][5];
+        //for(int i = 0; i < 6; i++){
+          //  data[i][0] = new Object[]{" ", false, "", "", ""};
+        //}
+       /*
         Object[][] data = {
                 {"AAPL", false, "100", "10000", "1000"},
                 {"NVDA", false, "50", "5000", "500"},
                 {"TSLA", false, "200", "20000", "2000"}
         };
 
+        */
+        Object[][] data = {
+                {"", false, "", "", ""},
+                {"", false, "", "", ""},
+                {"", false, "", "", ""},
+                {"", false, "", "", ""},
+                {"", false, "", "", ""}
+        };
+
+        for(int i =0 ; i < data.length ; i++){
+            tickersArray[i]="";
+        }
+
+
+
         String[] columnNames = {"Tickers", "ON/OFF Switch", "Quantity", "Position Size", "PNL"};
 
         // Create a table model and make the first column editable
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {
-            @Override
+
             public boolean isCellEditable(int row, int column) {
                 return column == 0 || column == 1;
                // return column == 1; // Only allow editing the ON/OFF Switch column
@@ -66,17 +148,34 @@ public class MainForm {
                 return super.getColumnClass(columnIndex);
             }
         };
+        model.addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
 
+                if (e.getType() == TableModelEvent.UPDATE && column == 0) {
+                    // Get the new value of the edited cell
+                    Object newValue = model.getValueAt(row, column);
+                    tickersArray[row] = newValue.toString();
+                    update();
+                    System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
+                }
+            }
+        });
         JTable table = new JTable(model);
 
-        JList stockIndexesListUI = new JList(storageIndexTicker.keySet().toArray());
-        stockIndexesListUI.setSelectedIndex(1);
-        stockIndexesListUI.setVisibleRowCount(1);
-        JPanel panelIndexChooser = componentWithLabel("Select index",stockIndexesListUI);
+
+       // String [] barSizeList = {"1 day", "1 hour", "4 hours", "1 min", "1 day", "1 week", "1 month"};
+        //JList barSizeUiList = new JList<>(barSizeList);
+        barSizeUiList.setSelectedIndex(0);
+        //stockIndexesListUI.setSelectedIndex(1);
+        //stockIndexesListUI.setVisibleRowCount(1);
+        //JPanel panelIndexChooser = componentWithLabel("Select index",stockIndexesListUI, null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 800);
+        frame.setSize(600, 900);
         frame.setLayout(new BorderLayout());
-        frame.add(panelIndexChooser);
+      //  frame.add(panelIndexChooser);
       //  frame.add(stockIndexesListUI);
 
         // Create a button
@@ -87,14 +186,14 @@ public class MainForm {
         volumeSettings.setColumns(5);
         volumeConfigurationPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         volumeConfigurationPanel.add(volumeSettings);
-        volumeConfigurationPanel.add(componentWithLabel("Volume settings",showVolumeButton));
-        JButton searchCross = new JButton("CrossEnterPoint search execute trade");
+        volumeConfigurationPanel.add(componentWithLabel("Volume settings",showVolumeButton, null));
+        //JButton searchCrosssearchCross = new JButton("CrossEnterPoint search execute trade");
 
 
         // Create a panel to add the button
         JPanel panel = new JPanel();
 
-        panel.add(panelIndexChooser);
+       // panel.add(panelIndexChooser);
         JPanel crossPanel = new JPanel();
 
         //JButton stockAboveSmaSearchButton = new JButton("Stock above 200 sma");
@@ -110,6 +209,7 @@ public class MainForm {
        // table.getColumnModel().getColumn(1).setCellRenderer(new MyTableCellRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new ToggleSwitchRenderer());
         table.getColumnModel().getColumn(1).setCellEditor(new ToggleSwitchEditor());
+        //table.getColumnModel
 
         crossPanel.add(new JScrollPane(table));
         //JTextField shortEma = new JTextField(10);
@@ -120,20 +220,20 @@ public class MainForm {
        // shortEma.setText("7");
        // longEma.setText("21");
         crossPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        crossPanel.add(searchCross);
-        JTextField shortEma = new JTextField();
+       // crossPanel.add(searchCross);
+
         shortEma.setColumns(4);
         shortEma.setText("12");
-        JTextField longEma = new JTextField();
+
         longEma.setText("26");
         longEma.setColumns(4);
-        JTextField capitalField = new JTextField();
+
         capitalField.setText("10000");
         capitalField.setColumns(8);
-        JTextField riskPercentField = new JTextField();
+
         riskPercentField.setText("1");
         riskPercentField.setColumns(4);
-        JTextField stopPercentField = new JTextField();
+
         stopPercentField.setText("4");
         stopPercentField.setColumns(4);
 
@@ -142,21 +242,39 @@ public class MainForm {
         trailingStopPercentField.setColumns(4);
 
 
-        JTextField bellowLargeEma = new JTextField();
+
         bellowLargeEma.setText("5");
+
         bellowLargeEma.setColumns(4);
-        JTextField largeEmaTextField = new JTextField();
+
         largeEmaTextField.setText("200");
         largeEmaTextField.setColumns(5);
-        crossPanel.add(componentWithLabel("totalAmount", capitalField));
-        crossPanel.add(componentWithLabel("risk %", riskPercentField));
-        crossPanel.add(componentWithLabel("Short Ema", shortEma));
-        crossPanel.add(componentWithLabel("Big Ema", longEma));
-        crossPanel.add(componentWithLabel("Large Ema", largeEmaTextField));
-        crossPanel.add(componentWithLabel("stop %", stopPercentField));
-        crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma));
-        crossPanel.add(componentWithLabel("trailing stop %", trailingStopPercentField));
-       // crossPanel.add(shortEma);
+        crossPanel.add(componentWithLabel("totalAmount", capitalField,null));
+        JCheckBox riskCheckBox = new JCheckBox("Risk checkbox");
+        JCheckBox strategyCheckbox = new JCheckBox("Strategy checkbox");
+        checkboxAddListener(riskCheckBox);
+        crossPanel.add(componentWithLabel("risk %", riskPercentField,riskCheckBox));
+        crossPanel.add(componentWithLabel("Short Ema", shortEma, null));
+        crossPanel.add(componentWithLabel("Big Ema", longEma,null));
+        crossPanel.add(componentWithLabel("Large Ema", largeEmaTextField,null));
+        JCheckBox stopCheckbox = new JCheckBox("Stop checkbox");
+        checkboxAddListener(stopCheckbox);
+        crossPanel.add(componentWithLabel("stop %", stopPercentField,stopCheckbox));
+        crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma,null));
+        JCheckBox trailingStopCheckbox = new JCheckBox("trailing stop checkbox");
+        crossPanel.add(componentWithLabel("trailing stop %", trailingStopPercentField,trailingStopCheckbox));
+        crossPanel.add(componentWithLabel("bar size settings",barSizeUiList,null));
+       // crossPanel.add(componentWithLabel("stock size settings",stockIndexesListUI,null));
+        crossPanel.add(strategyCheckbox);
+        strategyCheckbox.setSelected(true);
+        strategyCheckbox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        // crossPanel.add(componentWithLabel("strategy checkbox",strategyCheckbox,null));
+        // crossPanel.add(shortEma);
         //crossPanel.add(longEma);
         Border border = new LineBorder(Color.RED, 2);
         crossPanel.setBorder(border);
@@ -173,6 +291,7 @@ public class MainForm {
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
         frame.add(scrollPane, BorderLayout.CENTER);
+        /*
         searchCross.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -190,6 +309,8 @@ public class MainForm {
                 updateTextArea(textArea,messageList);
             }
         });
+
+         */
 
       /*
         stockAboveSmaSearchButton.addActionListener(actionEvent -> {
@@ -214,6 +335,7 @@ public class MainForm {
         frame.setVisible(true);
     }
 
+
     private  void updateTextArea(JTextArea textArea,List <String> tickerList){
         textArea.selectAll();
         textArea.replaceSelection("");
@@ -222,6 +344,8 @@ public class MainForm {
         }
     }
 }
+
+
  class ToggleSwitchRenderer extends JCheckBox implements TableCellRenderer {
     public ToggleSwitchRenderer() {
         setHorizontalAlignment(SwingConstants.CENTER);
@@ -240,9 +364,10 @@ public class MainForm {
     }
 }
 
+
 // Editor class for the toggle switch
 class ToggleSwitchEditor extends DefaultCellEditor {
-    private JCheckBox checkBox;
+    private final JCheckBox checkBox;
 
     public ToggleSwitchEditor() {
         super(new JCheckBox());
@@ -270,90 +395,13 @@ class ToggleSwitchEditor extends DefaultCellEditor {
     public Object getCellEditorValue() {
         return checkBox.isSelected();
     }
+
+
 }
 
-/*
-    private final JToggleButton toggleButton;
-
-    public MyTableCellRenderer() {
-        toggleButton = new JToggleButton();
-        toggleButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                    if (toggleButton.isSelected()) {
-                        System.out.println("TRADING SCAN");
-                    }
-            }
-        });
-        toggleButton.setOpaque(false);
-    }
-
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean
-            hasFocus, int row, int column) {
-        // Set the toggle  
-        //button's state based on the table value
-        if (isSelected) {
-            setForeground(table.getSelectionForeground());
-            setBackground(table.getSelectionBackground());
-        } else {
-            setForeground(table.getForeground());
-            setBackground(UIManager.getColor("Button.background"));
-        }
-        setText((value == null) ? "" : value.toString());
-        return this;
-    }
-       /*
-        if (isSelected) {
-            if(value.equals("OFF")) {
-                table.setValueAt("ON", row, column);
-               // toggleButton.setText("ON");
-            }
-            else{
-                table.setValueAt("OFF", row, column);
-               // toggleButton.setText("OFF");
-            }
-           // toggleButton.setSelected(true);
-        }
-
-        else {
-            if(toggleButton.getText().isEmpty()) {
-                toggleButton.setText("OFF");
-            }
-            //toggleButton.setText("OFF");
-            toggleButton.setSelected(false);
-        }
 
 
 
-        // Set the component's background and foreground colors
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        toggleButton.setForeground(getForeground());
-        toggleButton.setBackground(getBackground());
-
-        return toggleButton;
-
-        */
-    //}
-//}
 
 
-/*
-class MyTableCellRenderer extends JToggleButton implements TableCellRenderer {
-
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-        if (isSelected) {
-            setForeground(table.getSelectionForeground());
-            setBackground(table.getSelectionBackground());
-        } else {
-            setForeground(table.getForeground());
-            setBackground(UIManager.getColor("Button.background"));
-        }
-        setText((value == null) ? "" : value.toString());
-        return this;
-    }
-    }
-*/
 

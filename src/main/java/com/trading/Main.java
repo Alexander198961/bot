@@ -4,6 +4,7 @@ import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
 import com.trading.config.GlobalConfiguration;
 import com.trading.gui.MainForm;
+import com.trading.scheduler.TaskScheduler;
 import com.trading.support.reader.TickerReader;
 import com.trading.tickers.StockScarper;
 
@@ -16,22 +17,24 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 public class Main {
-    static EClientSocket m_client;
-    static EWrapperImpl wrapper;
+
+   // static TaskScheduler taskScheduler ;
 
     public static void main(String[] args) throws IOException {
         Cache cache = new Cache();
+        EClientSocket m_client;
+        EWrapperImpl wrapper;
         cache.init();
-        StockScarper stockScarper = new StockScarper();
-        List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
+       // StockScarper stockScarper = new StockScarper();
+       // List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
         //List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
        // FtpDownloader ftpDownloader = new FtpDownloader();
-        TickerReader tickerReader = new TickerReader();
+       // TickerReader tickerReader = new TickerReader();
         //List<String> nasdaq = tickerReader.tickers(ftpDownloader.downloadToText());
-        Map<String, List<String>> indexTickerStorage = new HashMap<>();
+        //Map<String, List<String>> indexTickerStorage = new HashMap<>();
         //sp500List =new ArrayList<>();
         //sp500List.add("BANL");
-        indexTickerStorage.put("SP500", sp500List);
+       // indexTickerStorage.put("SP500", sp500List);
        // indexTickerStorage.put("DOW", dowStocks);
         //indexTickerStorage.put("NASDAQ", nasdaq);
        // System.out.println("fetch==="+ sp500Scraper.fetch());
@@ -61,16 +64,20 @@ public class Main {
         ibSignalHandler.run();
         m_client = wrapper.getClient();
         assert m_client.isConnected();
+
         if (m_client.isConnected()) {
             System.out.println("Connected to TWS");
         }else{
             System.out.println("Couldn't connect");
             System.exit(10);
         }
+        TaskScheduler taskScheduler  = new TaskScheduler(wrapper);
+        taskScheduler.run();
 
        // sp500Tickers = new ArrayList<>();
         //sp500Tickers.add("BCOV");
-        MainForm mainForm = new MainForm(wrapper, indexTickerStorage);
+        MainForm mainForm = new MainForm();
+
         mainForm.display();
 
 
