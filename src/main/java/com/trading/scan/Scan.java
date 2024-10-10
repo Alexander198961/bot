@@ -4,6 +4,7 @@ import com.ib.client.Bar;
 import com.ib.controller.Account;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
+import com.trading.api.Unit;
 import com.trading.cache.Cache;
 import com.trading.config.RequestConfiguration;
 import com.trading.support.Calculator;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Scan {
-
+    private Unit unit = new Unit();
     abstract boolean criteriaIsMeet(List<Bar> list );
 
     private  boolean isListValid(List<Bar> list, String ticker){
@@ -27,7 +28,6 @@ public abstract class Scan {
 
 
     public List<String> scan(EWrapperImpl wrapper, Action action, List<String> tickers , RequestConfiguration requestConfiguration) {
-
         List<String> tickersMeetCriteria = new ArrayList<>();
         Utils utils = new Utils();
         if (action instanceof SaveTickerAction){
@@ -38,6 +38,7 @@ public abstract class Scan {
             if (ticker == null || ticker.isEmpty()) {
                 continue;
             }
+
             // todo use cache ?
             if (Cache.cache.getIfPresent(ticker) == null) {
                 wrapper.setList(new ArrayList<>());
@@ -45,7 +46,10 @@ public abstract class Scan {
                     System.err.println("is not connected");
                     break;
                 }
-                wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", "210 D", requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
+                String period = unit.initUnit().get(requestConfiguration.getBarSize());
+                long epochTimeLastRun =  System.currentTimeMillis();
+
+                wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", period, requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
                 utils.pause(1000);
                 if (!utils.isConnected(wrapper)) {
                     tickersMeetCriteria.add("Not connected");
@@ -57,6 +61,7 @@ public abstract class Scan {
                 if (check(list, ticker, action, tickersMeetCriteria) != null) {
                     return tickersMeetCriteria;
                 }
+                Cache.cache.put("lastRun", epochTimeLastRun);
 
 
             } else {

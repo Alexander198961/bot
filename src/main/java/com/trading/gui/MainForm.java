@@ -1,6 +1,7 @@
 package com.trading.gui;
 
 import com.trading.EWrapperImpl;
+import com.trading.api.Unit;
 import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
@@ -42,7 +43,8 @@ public class MainForm {
     private String [] tickersArray = new String[5];
     private JTextField longEma = new JTextField();
     private JTextField largeEmaTextField = new JTextField();
-    private final JList barSizeUiList = new JList<>(new String[]{"1 day", "1 hour", "4 hours", "1 min", "1 day", "1 week", "1 month"});
+    private final Unit unit = new Unit();
+    private final JList barSizeUiList = new JList<>(unit.initUnit().keySet().toArray(new String[0]));
 
     private JPanel componentWithLabel(String labelText, JComponent textField, JComponent additionalComponent){
         JPanel panel = new JPanel(new FlowLayout());
@@ -101,6 +103,8 @@ public class MainForm {
         //updateTextArea(textArea,messageList);
     }
     public void display() {
+
+
         JFrame frame = new JFrame("Trading scanner");
         //Object[][] data  = new Object[6][5];
         //for(int i = 0; i < 6; i++){

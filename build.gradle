@@ -1,6 +1,8 @@
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "6.0.0"
+    id 'maven-publish'
+    //id "com.github.johnrengelman.shadow" version "6.0.0"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 
@@ -12,7 +14,7 @@ sourceCompatibility = 8
 jar {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
-        attributes "Main-Class": "com.forex.Main"
+        attributes "Main-Class": "com.trading.Main"
     }
 
     from {
@@ -30,11 +32,14 @@ repositories {
 //    maven { url = uri("https://mvnrepository.com/artifact") }
 }
 dependencies {
-
+    implementation group: 'com.google.guava', name: 'guava', version: '23.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    implementation('junit:junit:4.12')
+    implementation group: 'commons-io', name: 'commons-io', version: '2.17.0'
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
-    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3'
-    implementation('junit:junit:4.12')
+    implementation group: 'commons-net', name: 'commons-net', version: '3.6'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.7.2'
     //implementation group: 'com.ib', name: 'interactive-brokers-api', version: '9.73'
     implementation files ("TwsApi.jar")    // compile group: 'com.ib', name: 'interactive-brokers-api', version: '9.73'
 
