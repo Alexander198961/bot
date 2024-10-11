@@ -1,35 +1,22 @@
 package com.trading.gui;
 
-import com.trading.EWrapperImpl;
-import com.trading.api.Unit;
+import com.trading.api.UnitController;
 import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
-import com.trading.scan.*;
-import com.trading.scheduler.TaskScheduler;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 
 public class MainForm {
@@ -43,8 +30,11 @@ public class MainForm {
     private String [] tickersArray = new String[5];
     private JTextField longEma = new JTextField();
     private JTextField largeEmaTextField = new JTextField();
-    private final Unit unit = new Unit();
-    private final JList barSizeUiList = new JList<>(unit.initUnit().keySet().toArray(new String[0]));
+    private final UnitController unit = new UnitController();
+    public MainForm(){
+        unit.init();
+    }
+    private final JList barSizeUiList = new JList<>(unit.barSize());
 
     private JPanel componentWithLabel(String labelText, JComponent textField, JComponent additionalComponent){
         JPanel panel = new JPanel(new FlowLayout());

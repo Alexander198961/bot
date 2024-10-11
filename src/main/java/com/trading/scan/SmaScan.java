@@ -4,6 +4,7 @@ import com.ib.client.Bar;
 import com.trading.support.EMACalculator;
 
 import java.util.List;
+import java.util.Set;
 
 public class SmaScan extends Scan {
     @Override

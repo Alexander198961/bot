@@ -3,6 +3,7 @@ package com.trading.support;
 import com.ib.client.Bar;
 
 import java.util.List;
+import java.util.Set;
 
 public class VolumeCalculator implements Calculator{
     @Override

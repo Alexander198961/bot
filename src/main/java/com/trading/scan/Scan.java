@@ -1,24 +1,25 @@
 package com.trading.scan;
 
 import com.ib.client.Bar;
-import com.ib.controller.Account;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
-import com.trading.api.Unit;
+import com.trading.api.UnitController;
 import com.trading.cache.Cache;
 import com.trading.config.RequestConfiguration;
-import com.trading.support.Calculator;
-import com.trading.support.VolumeCalculator;
-import com.trading.support.reader.TickerReader;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Scan {
-    private Unit unit = new Unit();
+    private final UnitController unit = new UnitController();
     abstract boolean criteriaIsMeet(List<Bar> list );
-
-    private  boolean isListValid(List<Bar> list, String ticker){
+    Scan(){
+        unit.init();
+    }
+    private  boolean isListValid(Set<Bar> list, String ticker){
         if (list.size() < 100) {
             System.err.println("ticker===" + ticker);
            return true;
@@ -41,36 +42,45 @@ public abstract class Scan {
 
             // todo use cache ?
             if (Cache.cache.getIfPresent(ticker) == null) {
-                wrapper.setList(new ArrayList<>());
+                wrapper.setList(new HashSet<>());
                 if (!wrapper.getClient().isConnected()) {
                     System.err.println("is not connected");
                     break;
                 }
-                String period = unit.initUnit().get(requestConfiguration.getBarSize());
-                long epochTimeLastRun =  System.currentTimeMillis();
-
+                String period = unit.getPeriodMap().get(requestConfiguration.getBarSize());
+               // long epochTimeLastRun =  System.currentTimeMillis();
+               Long epochTimeLastRunSecond = Instant.now().getEpochSecond();
+                String barSize = requestConfiguration.getBarSize();
                 wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", period, requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
                 utils.pause(1000);
                 if (!utils.isConnected(wrapper)) {
                     tickersMeetCriteria.add("Not connected");
                 }
-                List<Bar> list = wrapper.getList();
+                Set<Bar> list = wrapper.getList();
                 if (isListValid(list, ticker)) {
                     continue;
                 }
                 if (check(list, ticker, action, tickersMeetCriteria) != null) {
                     return tickersMeetCriteria;
                 }
-                Cache.cache.put("lastRun", epochTimeLastRun);
+                Cache.cache.put("lastRun", epochTimeLastRunSecond);
+                Cache.cache.put("ticker", list);
 
 
             } else {
-
-                System.out.println("read from cache===");
-                List<Bar> list = (List<Bar>) Cache.cache.getIfPresent(ticker);
-                wrapper.setList(new ArrayList<>());
-                if (check(list, ticker, action, tickersMeetCriteria) != null) {
-                    return tickersMeetCriteria;
+                Long epochTimeLastRunSecond = (Long) Cache.cache.getIfPresent("lastRun");
+                Long barSizeSeconds = unit.getMapSeconds().get(requestConfiguration.getBarSize());
+                long epochTimeCurrent = Instant.now().getEpochSecond();
+                if(epochTimeCurrent >(epochTimeLastRunSecond +  barSizeSeconds)) {
+                    System.out.println("read from cache===");
+                    Set<Bar> set = (Set<Bar>) Cache.cache.getIfPresent(ticker);
+                    wrapper.setList(new HashSet<>());
+                    wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", unit.getShortPeriodMap().get(requestConfiguration.getBarSize()), requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
+                    Cache.cache.put("lastRun", epochTimeCurrent);
+                    set.addAll(wrapper.getList());
+                    if (check(set, ticker, action, tickersMeetCriteria) != null) {
+                        return tickersMeetCriteria;
+                    }
                 }
 
 
@@ -84,16 +94,16 @@ public abstract class Scan {
         }
 
 
-    public List<String> check(List<Bar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
+    public Set<String> check(Set<Bar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
         if (isListValid(list, ticker)) {
             return null; // Or handle this case differently if needed
         }
-        if (criteriaIsMeet(list)) {
-            if (action.execute(list, ticker)) {
+        if (criteriaIsMeet(new ArrayList<>(list))) {
+            if (action.execute(new ArrayList<>(list), ticker)) {
                 SaveTickerAction actionSave = new SaveTickerAction();
                 actionSave.setTicker(tickersMeetCriteria);
-                actionSave.execute(list, ticker);
-                return tickersMeetCriteria;
+                actionSave.execute(new ArrayList<>(list), ticker);
+                return (Set<String>) tickersMeetCriteria;
             }
 
             System.out.println("ticker met criteria===" + ticker);
@@ -101,7 +111,7 @@ public abstract class Scan {
         }
         else{
             SaveTickerAction actionSave = new SaveTickerAction();
-            actionSave.saveToCache(list, ticker);
+            actionSave.saveToCache(new ArrayList<>(list), ticker);
         }
 
         return null; // Or handle this case differently if needed

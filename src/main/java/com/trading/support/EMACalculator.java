@@ -4,14 +4,16 @@ import com.ib.client.Bar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class EMACalculator implements Calculator {
     @Override
     public double calculate(List<Bar> barList) {
         return 0.0;
     }
-    public Double calculate(List<Bar> barList, int period) {
+    public Double calculate(List<Bar> barSet, int period) {
         // Check if barList is smaller than the period
+        List<Bar> barList = new ArrayList<>(barSet);
         if (barList.size() < period) {
             System.out.println("Not enough data to calculate SMA.");
             return (double) 0;
@@ -33,9 +35,9 @@ public class EMACalculator implements Calculator {
         return (double) 0;
     }
 
-    public List<Double> calculateEMA(List<Bar> barList, int period) {
+    public List<Double> calculateEMA(List<Bar> barSet, int period) {
         // Check if barList is smaller than the period
-
+        List<Bar> barList = new ArrayList<>(barSet);
         List<Double> emaList = new ArrayList<>();
         double alpha = 2.0 / (period + 1);
         double previousEMA = 0.0;

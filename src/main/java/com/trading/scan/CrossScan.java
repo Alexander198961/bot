@@ -4,6 +4,7 @@ import com.ib.client.Bar;
 import com.trading.support.EMACalculator;
 
 import java.util.List;
+import java.util.Set;
 
 public class CrossScan extends Scan {
 
@@ -27,6 +28,7 @@ public class CrossScan extends Scan {
         // int LONG = 26;
         //LARGE_EMA = 200;
         EMACalculator calculator = new EMACalculator();
+
         List<Double> smallEmaList = calculator.calculateEMA(list, SHORT);
         List<Double> largeEmaList = calculator.calculateEMA(list, LONG);
         List<Double> ema200List = calculator.calculateEMA(list, LARGE_EMA);

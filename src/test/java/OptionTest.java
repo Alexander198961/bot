@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,9 +80,10 @@ public class OptionTest extends TestSetUp {
         Thread.sleep(3000);
        // Calculator calculator = new VolumeCalculator();
         //calculator.calculate(wrapper.getList());
-        List<Bar> list = wrapper.getList();
+        List<Bar> list = (List<Bar>) wrapper.getList();
         EMACalculator smaCalculator = new EMACalculator();
-        double smaLastValue= smaCalculator.calculate(wrapper.getList(), 200);
+        double smaLastValue= smaCalculator.calculate(new ArrayList<>(
+                wrapper.getList()), 200);
         double lastClosePrice = list.get(list.size() -1).close();
         if(lastClosePrice> smaLastValue ){
                System.out.println("sma value====");
@@ -89,7 +91,12 @@ public class OptionTest extends TestSetUp {
        // System.out.printf("TESTTT#######@@@@@%s%n", );
     }
 
-    @Test
+    //@Test
+    public void test(){
+     Long seconds =   Instant.now().getEpochSecond();
+     System.out.println(seconds);
+    }
+    //@Test
     public void testEMA() throws Exception{
         Contract contract = new Contract();
         System.out.println("STARETEDD");
@@ -98,7 +105,7 @@ public class OptionTest extends TestSetUp {
         Thread.sleep(3000);
         System.out.println("size===="+wrapper.getList().size());
         EMACalculator smaCalculator = new EMACalculator();
-        smaCalculator.calculateEMA(wrapper.getList(), 13);
+        smaCalculator.calculateEMA(new ArrayList<>(wrapper.getList()), 13);
     }
 
    // @Test

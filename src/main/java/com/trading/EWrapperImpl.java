@@ -3,11 +3,8 @@ package com.trading;/* Copyright (C) 2019 Interactive Brokers LLC. All rights re
 
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import com.ib.client.*;
 
@@ -28,16 +25,16 @@ public class EWrapperImpl implements  EWrapper {
     private EClientSocket clientSocket;
     protected int currentOrderId = -1;
 
-    public List<Bar> getList() {
-        return list;
+    public Set<Bar> getList() {
+        return set;
     }
 
-    public void setList(List<Bar> list) {
+    public void setList(Set<Bar> set) {
 
-        this.list = list;
+        this.set = set;
     }
 
-    private List<Bar> list = new ArrayList<>();
+    private Set<Bar> set = new HashSet<>();
     //! [socket_declare]
 
     //! [socket_init]
@@ -255,7 +252,7 @@ public class EWrapperImpl implements  EWrapper {
     //! [historicaldata]
     @Override
     public void historicalData(int reqId, Bar bar) {
-        list.add(bar);
+        set.add(bar);
         //System.out.println("bar volume==="+ bar.volume().value());
         System.out.println("HistoricalData:  " + EWrapperMsgGenerator.historicalData(reqId, bar.time(), bar.open(), bar.high(), bar.low(), bar.close(), bar.volume(), bar.count(), bar.wap()));
     }

@@ -5,16 +5,8 @@ import com.trading.cache.Cache;
 import com.trading.config.GlobalConfiguration;
 import com.trading.gui.MainForm;
 import com.trading.scheduler.TaskScheduler;
-import com.trading.support.reader.TickerReader;
-import com.trading.tickers.StockScarper;
 
-import java.awt.*;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.swing.*;
-import javax.swing.table.*;
 
 public class Main {
 
