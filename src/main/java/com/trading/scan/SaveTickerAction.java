@@ -25,6 +25,6 @@ public class SaveTickerAction extends Action {
     }
 
     public void saveToCache(List<Bar> list, String ticker) {
-        Cache.cache.put(ticker, list);
+       // Cache.cache.put(ticker, list);
     }
 }

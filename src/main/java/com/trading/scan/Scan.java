@@ -60,11 +60,12 @@ public abstract class Scan {
                 if (isListValid(list, ticker)) {
                     continue;
                 }
+                Cache.cache.put("lastRun", epochTimeLastRunSecond);
+                Cache.cache.put(ticker, list);
                 if (check(list, ticker, action, tickersMeetCriteria) != null) {
                     return tickersMeetCriteria;
                 }
-                Cache.cache.put("lastRun", epochTimeLastRunSecond);
-                Cache.cache.put("ticker", list);
+
 
 
             } else {
@@ -78,6 +79,7 @@ public abstract class Scan {
                     wrapper.getClient().reqHistoricalData(1000 + 10, new USStockContract(ticker), "", unit.getShortPeriodMap().get(requestConfiguration.getBarSize()), requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
                     Cache.cache.put("lastRun", epochTimeCurrent);
                     set.addAll(wrapper.getList());
+                    Cache.cache.put(ticker, set);
                     if (check(set, ticker, action, tickersMeetCriteria) != null) {
                         return tickersMeetCriteria;
                     }

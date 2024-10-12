@@ -20,7 +20,7 @@ public class UnitController {
 
         final String [] barSize = {"1 min", "1 secs","1 hour", "1 day", "1 month" , "1 week"};
         final Long [] timeSecondsValues = {60L,1L,3600L, 86400L,  31536000L, 604800L   };
-        final String[] periodValues = {"10 D", "4 D", "50 D", "240 D", "320 D", "320 D"};
+        final String[] periodValues = {"5 D", "4 D", "50 D", "240 D", "320 D", "320 D"};
         final String [] shortPeriodValues = {"120 S", "3 S", "7200 S", "2 D", "2 M", "2 W"};
         private Map<String, String> initMapPeriod = new HashMap<>();
 
