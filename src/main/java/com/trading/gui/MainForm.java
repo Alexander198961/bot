@@ -5,6 +5,7 @@ import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
+import com.trading.scan.Entry;
 import com.trading.scan.TickerEntry;
 
 import javax.swing.*;
@@ -33,7 +34,7 @@ public class MainForm {
 
     private JTextField shortEma = new JTextField();
     private String [] tickersArray = new String[5];
-    private Map<String, TickerEntry> tickersStateMap = new HashMap<>();
+    private Map<String, Entry> tickersStateMap = new HashMap<>();
     private JTextField longEma = new JTextField();
     private JTextField largeEmaTextField = new JTextField();
     private final UnitController unit = new UnitController();
@@ -64,15 +65,15 @@ public class MainForm {
         });
     }
 
-    private void updateTickerState(){
+    private void updateTickerState( String prefix,int columnNumber){
         TableModel tableModel = table.getModel();
-        int columnNumber = 1;
+        //int columnNumber = 1;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             Object value = tableModel.getValueAt(i,columnNumber);
-            tickersStateMap.put((String) tableModel.getValueAt(i,0), new TickerEntry((Boolean) value));
+            tickersStateMap.put((String) tableModel.getValueAt(i,0), new Entry((Boolean) value));
             System.out.println("value===="+value);
         }
-        Cache.cache.put(Cache.Keys.tickersStateMap.name(), tickersStateMap);
+        Cache.cache.put(prefix +Cache.Keys.tickersStateMap.name(), tickersStateMap);
     }
 
     private void updateTickerNameColumn(){
@@ -173,11 +174,16 @@ public class MainForm {
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
-                if (e.getType() == TableModelEvent.UPDATE && column == 1) {
-                    updateTickerState();
+                if(e.getType() == TableModelEvent.UPDATE && column == 2){
+                    updateTickerState(Cache.Keys.Trailing.name(), column);
+
 
                 }
-                if (e.getType() == TableModelEvent.UPDATE && column == 0) {
+                else if (e.getType() == TableModelEvent.UPDATE && column == 1) {
+                    updateTickerState(Cache.Keys.IsScheduled.name(),column);
+
+                }
+                else if (e.getType() == TableModelEvent.UPDATE && column == 0) {
                     // Get the new value of the edited cell
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();

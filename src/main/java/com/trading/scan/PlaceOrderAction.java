@@ -3,9 +3,11 @@ package com.trading.scan;
 import com.ib.client.*;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
+import com.trading.cache.Cache;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
 
 public class PlaceOrderAction extends Action {
     private double accountValue = 10000;
@@ -27,7 +29,7 @@ public class PlaceOrderAction extends Action {
     private final EWrapperImpl wrapper;
 
     @Override
-    public boolean execute(List<Bar> list, String symbol) {
+    public boolean execute(List<Bar> list, String ticker) {
         Utils utils = new Utils();
         int orderId = 0;
         double accountValue = this.accountValue;
@@ -35,7 +37,7 @@ public class PlaceOrderAction extends Action {
         wrapper.getClient().reqIds(1);
         wrapper.setLastPrice(0);
         orderId = getOrderId();
-        Contract contract = new USStockContract(symbol);
+        Contract contract = new USStockContract(ticker);
         wrapper.getClient().reqMktData(orderId, contract, "", false, false, null);
         utils.pause(1000);
         double amountToPut = accountValue / 100 * risk;
@@ -44,8 +46,8 @@ public class PlaceOrderAction extends Action {
         double price = wrapper.getLastPrice();
         if (price == 0 || price<0) {
             // todo: return it
-            //return false;
-            price = list.get(list.size() -1).close();
+            return false;
+           // price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
         double totalQty = amountToPut / price;
@@ -76,25 +78,31 @@ public class PlaceOrderAction extends Action {
         }
 
         utils.pause(2000);
-        orderId = orderId + 1;
-        order = new Order();
-        order.action("SELL");
-        order.orderType(OrderType.STP);
-        order.totalQuantity(Decimal.get(totalQty));
-        stopPrice = Double.parseDouble(df.format(stopPrice));
-        order.auxPrice(stopPrice);
-        wrapper.getClient().placeOrder(orderId + 1, contract, order);
-        utils.pause(1000);
-        orderId = orderId + 1;
-        order = new Order();
-        order.action("SELL");
-        order.orderType(OrderType.TRAIL);
-        order.totalQuantity(Decimal.get(totalQty));
-        order.trailStopPrice(trailingStopPrice);
+        Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.Trailing + Cache.Keys.tickersStateMap.name());
+        if (mapTickersState != null && !mapTickersState.isEmpty() && mapTickersState.get(ticker) != null && mapTickersState.get(ticker).getEnabled() == true) {
+            orderId = orderId + 1;
+            order = new Order();
+            order.action("SELL");
+            order.orderType(OrderType.STP);
+            order.totalQuantity(Decimal.get(totalQty));
+            stopPrice = Double.parseDouble(df.format(stopPrice));
+            order.auxPrice(stopPrice);
+            wrapper.getClient().placeOrder(orderId + 1, contract, order);
+            utils.pause(1000);
+            orderId = orderId + 1;
+            order = new Order();
+            order.action("SELL");
+            order.orderType(OrderType.TRAIL);
+            order.totalQuantity(Decimal.get(totalQty));
+            order.trailingPercent(trailingStopPrice);
+            wrapper.getClient().placeOrder(orderId + 1, contract, order);
+            utils.pause(2000);
+        }
+        //order.trailStopPrice(trailingStopPrice);
+        //order.adjustedTrailingAmount();
        // stopPrice = Double.parseDouble(df.format(stopPrice));
        // order.auxPrice(stopPrice);
-        wrapper.getClient().placeOrder(orderId + 1, contract, order);
-        utils.pause(2000);
+
 
 
 

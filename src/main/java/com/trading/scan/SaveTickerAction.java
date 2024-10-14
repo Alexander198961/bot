@@ -26,7 +26,7 @@ public class SaveTickerAction extends Action {
     }
 
     public void saveToCache(Collection<Bar> list, String ticker, Long epochTimeCurrent) {
-        Cache.cache.put("lastRun", epochTimeCurrent);
+        Cache.cache.put(Cache.Keys.LastRun.name() + ticker, epochTimeCurrent);
         Cache.cache.put(ticker, list);
     }
 

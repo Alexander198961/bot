@@ -41,13 +41,13 @@ public class CrossScan extends Scan {
         double ema200Value = ema200List.get(ema200Size - 1);
         double price = list.get(list.size() - 1).close();
         // todo: remove it
-        return true;
-        /*
+//        return true;
+
         if (smallEmaList.get(smallEmaSize - 1) > largeEmaList.get(largeEmaSize - 1) && ((ema200Value - ema200Value / 100 * bellowEma) < price)) {
             return largeEmaList.get(largeEmaSize - 2) > smallEmaList.get(smallEmaSize - 2);
         }
         return false;
-        */
+
 
     }
 }

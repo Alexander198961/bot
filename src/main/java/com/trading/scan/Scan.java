@@ -39,7 +39,7 @@ public abstract class Scan {
         }
 
         */
-        Map<String, TickerEntry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.tickersStateMap.name());
+        Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.IsScheduled + Cache.Keys.tickersStateMap.name());
         for (String ticker : tickers) {
             if (ticker == null || ticker.isEmpty()) {
                 continue;
@@ -78,7 +78,7 @@ public abstract class Scan {
 
 
             } else {
-                Long epochTimeLastRunSecond = (Long) Cache.cache.getIfPresent("lastRun");
+                Long epochTimeLastRunSecond = (Long) Cache.cache.getIfPresent(Cache.Keys.LastRun + ticker);
                 Long barSizeSeconds = unit.getMapSeconds().get(requestConfiguration.getBarSize());
                 long epochTimeCurrent = Instant.now().getEpochSecond();
                 if (epochTimeCurrent > (epochTimeLastRunSecond + barSizeSeconds)) {
@@ -86,6 +86,8 @@ public abstract class Scan {
                     Set<Bar> set = (Set<Bar>) Cache.cache.getIfPresent(ticker);
                     wrapper.setList(new HashSet<>());
                     wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", unit.getShortPeriodMap().get(requestConfiguration.getBarSize()), requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
+                    utils.pause(1000);
+                    set.addAll( wrapper.getList());
                     saveTickerAction.saveToCache(set,ticker, epochTimeCurrent);
                     //Cache.cache.put("lastRun", epochTimeCurrent);
                     //set.addAll(wrapper.getList());
