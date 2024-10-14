@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Cache {
   public static enum Keys {
-      Tickers, TradeConfig, EmaConfig, RequestConfig
+      Tickers, TradeConfig, EmaConfig, RequestConfig, tickersStateMap
   }
    public static com.google.common.cache.Cache<String, Object> cache =CacheBuilder.newBuilder()
             // .maximumSize(100)  // Limit cache size to 100 entries

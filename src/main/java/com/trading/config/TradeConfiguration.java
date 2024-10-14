@@ -5,6 +5,16 @@ public class TradeConfiguration {
         return riskPercent;
     }
 
+    public double getTrailingStop() {
+        return trailingStop;
+    }
+
+    public void setTrailingStop(double trailingStop) {
+        this.trailingStop = trailingStop;
+    }
+
+    private double trailingStop;
+
     public void setRiskPercent(double riskPercent) {
         this.riskPercent = riskPercent;
     }

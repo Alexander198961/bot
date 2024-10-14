@@ -113,13 +113,13 @@ public class OptionTest extends TestSetUp {
         //SP500Scraper sp500Scraper = new SP500Scraper();
         //System.out.println("fetch==="+ sp500Scraper.fetch());
     }
-   // @Test
+   @Test
     public void scannerCross() throws InterruptedException {
         //acmr axdx
-        //TickerReader tickerReader = new TickerReader();
-        //List<String> tickers = tickerReader.tickers();
-       // Scan scan = new CrossScan(9,26);
-       // scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 1), tickers);
+        TickerReader tickerReader = new TickerReader();
+      //  List<String> tickers = tickerReader.tickers();
+       //Scan scan = new CrossScan(9,26);
+       //scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 1, 10), tickers);
     }
 
    // @Test

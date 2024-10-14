@@ -5,6 +5,7 @@ import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
+import com.trading.scan.TickerEntry;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,19 +16,24 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 
 public class MainForm {
 
-
+    private JTable table;
     private JTextField riskPercentField = new JTextField();
     private JTextField bellowLargeEma = new JTextField();
     private JTextField stopPercentField = new JTextField();
     private JTextField capitalField = new JTextField();
+    private JTextField trailingStopPercentField = new JTextField();
+
     private JTextField shortEma = new JTextField();
     private String [] tickersArray = new String[5];
+    private Map<String, TickerEntry> tickersStateMap = new HashMap<>();
     private JTextField longEma = new JTextField();
     private JTextField largeEmaTextField = new JTextField();
     private final UnitController unit = new UnitController();
@@ -58,7 +64,18 @@ public class MainForm {
         });
     }
 
-    private void update(){
+    private void updateTickerState(){
+        TableModel tableModel = table.getModel();
+        int columnNumber = 1;
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            Object value = tableModel.getValueAt(i,columnNumber);
+            tickersStateMap.put((String) tableModel.getValueAt(i,0), new TickerEntry((Boolean) value));
+            System.out.println("value===="+value);
+        }
+        Cache.cache.put(Cache.Keys.tickersStateMap.name(), tickersStateMap);
+    }
+
+    private void updateTickerNameColumn(){
         double riskPercent = Double.parseDouble(riskPercentField.getText());
         double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
         double stopPercent = Double.parseDouble(stopPercentField.getText());
@@ -75,6 +92,8 @@ public class MainForm {
         tradeConfiguration.setCapital(capital);
         tradeConfiguration.setRiskPercent(riskPercent);
         tradeConfiguration.setStopPercent(stopPercent);
+        // todo check checkbox
+        tradeConfiguration.setTrailingStop(Double.parseDouble(trailingStopPercentField.getText()));
         String selectedBar = barSizeUiList.getSelectedValue().toString();
         RequestConfiguration requestConfiguration = new RequestConfiguration();
         requestConfiguration.setBarSize(selectedBar);
@@ -82,6 +101,11 @@ public class MainForm {
         Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
         Cache.cache.put(Cache.Keys.TradeConfig.name(), tradeConfiguration);
         Cache.cache.put(Cache.Keys.EmaConfig.name(), emaConfiguration);
+        TableModel tableModel = table.getModel();
+        int columnNumber = 1;
+        //updateTickerState();
+        //tickersMap
+
 
         //Cache.cache.put("emaConfig", emaConfiguration);
         //List<String> list = scan.scan(wrapper, new PlaceOrderAction(wrapper, capital,riskPercent,  stopPercent), Arrays.asList(tickersArray));
@@ -109,11 +133,11 @@ public class MainForm {
 
         */
         Object[][] data = {
-                {"", false, "", "", ""},
-                {"", false, "", "", ""},
-                {"", false, "", "", ""},
-                {"", false, "", "", ""},
-                {"", false, "", "", ""}
+                {"", false, false ,"", "", ""},
+                {"", false, false ,"", "", ""},
+                {"", false, false , "", "", ""},
+                {"", false, false , "", "", ""},
+                {"", false, false , "", "", ""},
         };
 
         for(int i =0 ; i < data.length ; i++){
@@ -122,21 +146,23 @@ public class MainForm {
 
 
 
-        String[] columnNames = {"Tickers", "ON/OFF Switch", "Quantity", "Position Size", "PNL"};
+        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "Quantity", "Position Size", "PNL"};
 
         // Create a table model and make the first column editable
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {
 
             public boolean isCellEditable(int row, int column) {
-                return column == 0 || column == 1;
+                return column == 0 || column == 1 || column == 2;
                // return column == 1; // Only allow editing the ON/OFF Switch column
             }
+
+
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
 
 
-                if (columnIndex == 1) {
+                if (columnIndex == 1 || columnIndex == 2) {
                     return Boolean.class; // Set the ON/OFF Switch column as Boolean
                 }
                 return super.getColumnClass(columnIndex);
@@ -147,17 +173,21 @@ public class MainForm {
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
+                if (e.getType() == TableModelEvent.UPDATE && column == 1) {
+                    updateTickerState();
 
+                }
                 if (e.getType() == TableModelEvent.UPDATE && column == 0) {
                     // Get the new value of the edited cell
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
-                    update();
+                    updateTickerNameColumn();
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
                 }
             }
         });
-        JTable table = new JTable(model);
+        table = new JTable(model);
+      //  table.getColumnModel().getColumn(1).ge
 
 
        // String [] barSizeList = {"1 day", "1 hour", "4 hours", "1 min", "1 day", "1 week", "1 month"};
@@ -203,6 +233,9 @@ public class MainForm {
        // table.getColumnModel().getColumn(1).setCellRenderer(new MyTableCellRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new ToggleSwitchRenderer());
         table.getColumnModel().getColumn(1).setCellEditor(new ToggleSwitchEditor());
+
+        table.getColumnModel().getColumn(2).setCellRenderer(new ToggleSwitchRenderer());
+        table.getColumnModel().getColumn(2).setCellEditor(new ToggleSwitchEditor());
         //table.getColumnModel
 
         crossPanel.add(new JScrollPane(table));
@@ -231,7 +264,6 @@ public class MainForm {
         stopPercentField.setText("4");
         stopPercentField.setColumns(4);
 
-        JTextField trailingStopPercentField = new JTextField();
         trailingStopPercentField.setText("4");
         trailingStopPercentField.setColumns(4);
 

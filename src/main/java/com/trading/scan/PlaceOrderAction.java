@@ -11,13 +11,14 @@ public class PlaceOrderAction extends Action {
     private double accountValue = 10000;
     private double risk = 1;
     private final double stopPercent;
+    private double trailingStopPrice;
 
-    public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk, double stopPercent) {
+    public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk, double stopPercent, double trailingStopPrice) {
         this.wrapper = eWrapperImpl;
         this.accountValue = accountValue;
         this.risk = risk;
         this.stopPercent = stopPercent;
-
+        this.trailingStopPrice = trailingStopPrice;
 
     }
 
@@ -41,9 +42,10 @@ public class PlaceOrderAction extends Action {
         DecimalFormat df = new DecimalFormat("#.##");
         //double price =list.get(list.size() -1).close();
         double price = wrapper.getLastPrice();
-        if (price == 0) {
-            return false;
-            //price = list.get(list.size() -1).close();
+        if (price == 0 || price<0) {
+            // todo: return it
+            //return false;
+            price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
         double totalQty = amountToPut / price;
@@ -83,6 +85,19 @@ public class PlaceOrderAction extends Action {
         order.auxPrice(stopPrice);
         wrapper.getClient().placeOrder(orderId + 1, contract, order);
         utils.pause(1000);
+        orderId = orderId + 1;
+        order = new Order();
+        order.action("SELL");
+        order.orderType(OrderType.TRAIL);
+        order.totalQuantity(Decimal.get(totalQty));
+        order.trailStopPrice(trailingStopPrice);
+       // stopPrice = Double.parseDouble(df.format(stopPrice));
+       // order.auxPrice(stopPrice);
+        wrapper.getClient().placeOrder(orderId + 1, contract, order);
+        utils.pause(2000);
+
+
+
         return true;
     }
 

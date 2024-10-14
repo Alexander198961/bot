@@ -4,6 +4,7 @@ import com.google.common.base.Ticker;
 import com.ib.client.Bar;
 import com.trading.cache.Cache;
 
+import java.util.Collection;
 import java.util.List;
 
 public class SaveTickerAction extends Action {
@@ -24,7 +25,10 @@ public class SaveTickerAction extends Action {
         return false;
     }
 
-    public void saveToCache(List<Bar> list, String ticker) {
-       // Cache.cache.put(ticker, list);
+    public void saveToCache(Collection<Bar> list, String ticker, Long epochTimeCurrent) {
+        Cache.cache.put("lastRun", epochTimeCurrent);
+        Cache.cache.put(ticker, list);
     }
+
+
 }
