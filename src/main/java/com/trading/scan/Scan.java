@@ -20,11 +20,11 @@ public abstract class Scan {
     }
 
     private boolean isListValid(Set<Bar> list, String ticker) {
-        if (list.size() < 100) {
+        if (list.size() < 3) {
             System.err.println("ticker===" + ticker);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
 
 
@@ -72,7 +72,7 @@ public abstract class Scan {
                     tickersMeetCriteria.add("Not connected");
                 }
                 Set<Bar> list = wrapper.getList();
-                if (isListValid(list, ticker)) {
+                if (!isListValid(list, ticker)) {
                     continue;
                 }
                 //Cache.cache.put("lastRun", epochTimeLastRunSecond);
@@ -85,7 +85,7 @@ public abstract class Scan {
 
             } else {
                 Long epochTimeLastRunSecond = (Long) Cache.cache.getIfPresent(Cache.Keys.LastRun + ticker);
-                Long barSizeSeconds = unit.getMapSeconds().get(requestConfiguration.getBarSize());
+                Long barSizeSeconds = unit.getMapSeconds().get(barSize);
                 long epochTimeCurrent = Instant.now().getEpochSecond();
                 if (epochTimeCurrent > (epochTimeLastRunSecond + barSizeSeconds)) {
                     System.out.println("read from cache===");
