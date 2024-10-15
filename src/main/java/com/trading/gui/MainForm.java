@@ -5,6 +5,7 @@ import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
+import com.trading.scan.BarEntry;
 import com.trading.scan.Entry;
 import com.trading.scan.TickerEntry;
 
@@ -34,7 +35,7 @@ public class MainForm {
 
     private JTextField shortEma = new JTextField();
     private String [] tickersArray = new String[5];
-    private Map<String, Entry> tickersStateMap = new HashMap<>();
+
     private JTextField longEma = new JTextField();
     private JTextField largeEmaTextField = new JTextField();
     private final UnitController unit = new UnitController();
@@ -66,13 +67,19 @@ public class MainForm {
     }
 
     private void updateTickerState( String prefix,int columnNumber){
+        Map<String, Object> tickersStateMap = new HashMap<>();
         TableModel tableModel = table.getModel();
         //int columnNumber = 1;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             Object value = tableModel.getValueAt(i,columnNumber);
-            tickersStateMap.put((String) tableModel.getValueAt(i,0), new Entry((Boolean) value));
-            System.out.println("value===="+value);
+            if (value instanceof String) {
+                tickersStateMap.put((String) tableModel.getValueAt(i, 0), new BarEntry((String) value));
+            }
+            else {
+                tickersStateMap.put((String) tableModel.getValueAt(i, 0), new Entry((Boolean) value));
+            }
         }
+        //
         Cache.cache.put(prefix +Cache.Keys.tickersStateMap.name(), tickersStateMap);
     }
 
@@ -98,11 +105,14 @@ public class MainForm {
         String selectedBar = barSizeUiList.getSelectedValue().toString();
         RequestConfiguration requestConfiguration = new RequestConfiguration();
         requestConfiguration.setBarSize(selectedBar);
+
         Cache.cache.put(Cache.Keys.RequestConfig.name(), requestConfiguration);
         Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
         Cache.cache.put(Cache.Keys.TradeConfig.name(), tradeConfiguration);
         Cache.cache.put(Cache.Keys.EmaConfig.name(), emaConfiguration);
         TableModel tableModel = table.getModel();
+
+
         int columnNumber = 1;
         //updateTickerState();
         //tickersMap
@@ -133,12 +143,13 @@ public class MainForm {
         };
 
         */
+        String initUnit = unit.barSize()[0];
         Object[][] data = {
-                {"", false, false ,"", "", ""},
-                {"", false, false ,"", "", ""},
-                {"", false, false , "", "", ""},
-                {"", false, false , "", "", ""},
-                {"", false, false , "", "", ""},
+                {"", false, false ,initUnit,"", "", ""},
+                {"", false, false ,initUnit, "" ,"", ""},
+                {"", false, false , initUnit, "","", ""},
+                {"", false, false ,initUnit , "","", ""},
+                {"", false, false , initUnit, "","", ""},
         };
 
         for(int i =0 ; i < data.length ; i++){
@@ -147,13 +158,13 @@ public class MainForm {
 
 
 
-        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "Quantity", "Position Size", "PNL"};
+        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "Quantity", "Position Size", "PNL"};
 
         // Create a table model and make the first column editable
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {
 
             public boolean isCellEditable(int row, int column) {
-                return column == 0 || column == 1 || column == 2;
+                return column == 0 || column == 1 || column == 2 || column == 3 ;
                // return column == 1; // Only allow editing the ON/OFF Switch column
             }
 
@@ -174,9 +185,12 @@ public class MainForm {
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
-                if(e.getType() == TableModelEvent.UPDATE && column == 2){
+                if(e.getType() == TableModelEvent.UPDATE && column == 3){
+                    Cache.cache.invalidate(table.getModel().getValueAt(row,3));
+                    updateTickerState(Cache.Keys.BarTimeFrame.name(), column);
+                }
+                else if(e.getType() == TableModelEvent.UPDATE && column == 2){
                     updateTickerState(Cache.Keys.Trailing.name(), column);
-
 
                 }
                 else if (e.getType() == TableModelEvent.UPDATE && column == 1) {
@@ -188,6 +202,7 @@ public class MainForm {
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
                     updateTickerNameColumn();
+                    updateTickerState(Cache.Keys.BarTimeFrame.name(), 3);
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
                 }
             }
@@ -242,7 +257,11 @@ public class MainForm {
 
         table.getColumnModel().getColumn(2).setCellRenderer(new ToggleSwitchRenderer());
         table.getColumnModel().getColumn(2).setCellEditor(new ToggleSwitchEditor());
+        System.out.println("bar size==="+unit.barSize());
+        JComboBox<String> comboBox = new JComboBox<>(unit.barSize());
+        table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox));
         //table.getColumnModel
+       // updateTickerState(Cache.Keys.BarTimeFrame.name(), 3);
 
         crossPanel.add(new JScrollPane(table));
         //JTextField shortEma = new JTextField(10);
@@ -281,6 +300,7 @@ public class MainForm {
 
         largeEmaTextField.setText("200");
         largeEmaTextField.setColumns(5);
+
         crossPanel.add(componentWithLabel("totalAmount", capitalField,null));
         JCheckBox riskCheckBox = new JCheckBox("Risk checkbox");
         JCheckBox strategyCheckbox = new JCheckBox("Strategy checkbox");

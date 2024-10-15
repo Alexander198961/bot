@@ -44,11 +44,16 @@ public abstract class Scan {
             if (ticker == null || ticker.isEmpty()) {
                 continue;
             }
-            assert mapTickersState != null;
+
+            if(mapTickersState == null || mapTickersState.get(ticker) == null) {
+                continue;
+
+            }
             if(!mapTickersState.get(ticker).getEnabled()){
                 continue;
             }
-
+            Map<String, BarEntry> tickersStateMap = (Map<String, BarEntry>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + Cache.Keys.tickersStateMap.name());
+            String barSize = tickersStateMap.get(ticker).getSize();
             // todo use cache ?
             if (Cache.cache.getIfPresent(ticker) == null) {
                 wrapper.setList(new HashSet<>());
@@ -59,7 +64,8 @@ public abstract class Scan {
                 String period = unit.getPeriodMap().get(requestConfiguration.getBarSize());
                 // long epochTimeLastRun =  System.currentTimeMillis();
                 Long epochTimeLastRunSecond = Instant.now().getEpochSecond();
-                String barSize = requestConfiguration.getBarSize();
+
+                //String barSize = requestConfiguration.getBarSize();
                 wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", period, barSize, "TRADES", 1, 1, false, null);
                 utils.pause(1000);
                 if (!utils.isConnected(wrapper)) {
@@ -85,9 +91,9 @@ public abstract class Scan {
                     System.out.println("read from cache===");
                     Set<Bar> set = (Set<Bar>) Cache.cache.getIfPresent(ticker);
                     wrapper.setList(new HashSet<>());
-                    wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", unit.getShortPeriodMap().get(requestConfiguration.getBarSize()), requestConfiguration.getBarSize(), "TRADES", 1, 1, false, null);
+                    wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", unit.getShortPeriodMap().get(barSize), barSize, "TRADES", 1, 1, false, null);
                     utils.pause(1000);
-                    set.addAll( wrapper.getList());
+                    set.addAll(wrapper.getList());
                     saveTickerAction.saveToCache(set,ticker, epochTimeCurrent);
                     //Cache.cache.put("lastRun", epochTimeCurrent);
                     //set.addAll(wrapper.getList());

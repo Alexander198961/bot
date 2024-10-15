@@ -68,8 +68,10 @@ public class Main {
 
        // sp500Tickers = new ArrayList<>();
         //sp500Tickers.add("BCOV");
-        MainForm mainForm = new MainForm();
 
+        //TableWithDropdownForm tableWithDropdownForm = new TableWithDropdownForm();
+        //tableWithDropdownForm.display();
+        MainForm mainForm = new MainForm();
         mainForm.display();
 
 
