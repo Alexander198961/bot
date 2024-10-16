@@ -61,11 +61,13 @@ public abstract class Scan {
                     System.err.println("is not connected");
                     break;
                 }
-                String period = unit.getPeriodMap().get(requestConfiguration.getBarSize());
+                String period = unit.getPeriodMap().get(barSize);
                 // long epochTimeLastRun =  System.currentTimeMillis();
                 Long epochTimeLastRunSecond = Instant.now().getEpochSecond();
 
                 //String barSize = requestConfiguration.getBarSize();
+                assert period!= null;
+                assert barSize!= null;
                 wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", period, barSize, "TRADES", 1, 1, false, null);
                 utils.pause(1000);
                 if (!utils.isConnected(wrapper)) {
@@ -91,7 +93,10 @@ public abstract class Scan {
                     System.out.println("read from cache===");
                     Set<Bar> set = (Set<Bar>) Cache.cache.getIfPresent(ticker);
                     wrapper.setList(new HashSet<>());
-                    wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", unit.getShortPeriodMap().get(barSize), barSize, "TRADES", 1, 1, false, null);
+                    String period = unit.getShortPeriodMap().get(barSize);
+                    assert period!= null;
+                    assert barSize!= null;
+                    wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", period, barSize, "TRADES", 1, 1, false, null);
                     utils.pause(1000);
                     set.addAll(wrapper.getList());
                     saveTickerAction.saveToCache(set,ticker, epochTimeCurrent);
