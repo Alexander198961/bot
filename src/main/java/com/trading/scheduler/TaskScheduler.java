@@ -32,7 +32,8 @@ public class TaskScheduler {
         scheduler.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if (Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name()) != null && Cache.cache.getIfPresent(Cache.Keys.Tickers.name()) != null) {
+                //Cache.cache.getIfPresent(Cache.Keys.StrategyEnabled.name());
+                    if (Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name()) != null && Cache.cache.getIfPresent(Cache.Keys.Tickers.name()) != null) {
                     System.out.println("inside: ");
 
                     try {
@@ -41,8 +42,6 @@ public class TaskScheduler {
                         TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
                         List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
                         RequestConfiguration requestConfiguration = (RequestConfiguration) Cache.cache.getIfPresent(Cache.Keys.RequestConfig.name());
-                        String barSize = requestConfiguration.getBarSize();
-
                         Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
                         List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers, requestConfiguration);
                     } catch (Exception e) {

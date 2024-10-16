@@ -55,6 +55,7 @@ public abstract class Scan {
             Map<String, BarEntry> tickersStateMap = (Map<String, BarEntry>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + Cache.Keys.tickersStateMap.name());
             String barSize = tickersStateMap.get(ticker).getSize();
             // todo use cache ?
+            System.out.println("test==="+Cache.cache.getIfPresent(ticker));
             if (Cache.cache.getIfPresent(ticker) == null) {
                 wrapper.setList(new HashSet<>());
                 if (!wrapper.getClient().isConnected()) {

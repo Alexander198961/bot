@@ -24,36 +24,28 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-public class MainForm {
+public class MainForm extends CommonForm {
 
     private JTable table;
-    private JTextField riskPercentField = new JTextField();
-    private JTextField bellowLargeEma = new JTextField();
-    private JTextField stopPercentField = new JTextField();
-    private JTextField capitalField = new JTextField();
-    private JTextField trailingStopPercentField = new JTextField();
+    private final JTextField riskPercentField = new JTextField();
+    private final JTextField bellowLargeEma = new JTextField();
+    private final JTextField stopPercentField = new JTextField();
+    private final JTextField capitalField = new JTextField();
+    private final JTextField trailingStopPercentField = new JTextField();
 
-    private JTextField shortEma = new JTextField();
-    private String [] tickersArray = new String[5];
 
-    private JTextField longEma = new JTextField();
-    private JTextField largeEmaTextField = new JTextField();
+    private final JTextField shortEma = new JTextField();
+    private final String [] tickersArray = new String[5];
+
+    private final JTextField longEma = new JTextField();
+    private final JTextField largeEmaTextField = new JTextField();
     private final UnitController unit = new UnitController();
     public MainForm(){
         unit.init();
     }
-    private final JList barSizeUiList = new JList<>(unit.barSize());
 
-    private JPanel componentWithLabel(String labelText, JComponent textField, JComponent additionalComponent){
-        JPanel panel = new JPanel(new FlowLayout());
-        JLabel jLabel = new JLabel(labelText);
-        panel.add(jLabel);
-        panel.add(textField);
-        if(additionalComponent != null){
-            panel.add(additionalComponent);
-        }
-        return panel;
-    }
+
+
 
     private  void checkboxAddListener(JCheckBox checkBox){
         checkBox.addActionListener(new ActionListener() {
@@ -73,6 +65,7 @@ public class MainForm {
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             Object value = tableModel.getValueAt(i,columnNumber);
             if (value instanceof String) {
+
                 tickersStateMap.put((String) tableModel.getValueAt(i, 0), new BarEntry((String) value));
             }
             else {
@@ -102,9 +95,8 @@ public class MainForm {
         tradeConfiguration.setStopPercent(stopPercent);
         // todo check checkbox
         tradeConfiguration.setTrailingStop(Double.parseDouble(trailingStopPercentField.getText()));
-        String selectedBar = barSizeUiList.getSelectedValue().toString();
+
         RequestConfiguration requestConfiguration = new RequestConfiguration();
-        requestConfiguration.setBarSize(selectedBar);
 
         Cache.cache.put(Cache.Keys.RequestConfig.name(), requestConfiguration);
         Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
@@ -113,7 +105,7 @@ public class MainForm {
         TableModel tableModel = table.getModel();
 
 
-        int columnNumber = 1;
+
         //updateTickerState();
         //tickersMap
 
@@ -172,8 +164,6 @@ public class MainForm {
 
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-
-
                 if (columnIndex == 1 || columnIndex == 2) {
                     return Boolean.class; // Set the ON/OFF Switch column as Boolean
                 }
@@ -186,7 +176,10 @@ public class MainForm {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
-                    Cache.cache.invalidate(table.getModel().getValueAt(row,3));
+                    String tickerName = (String) table.getModel().getValueAt(row,0);
+                    System.out.println("tickerName===" + tickerName);
+                    Cache.cache.invalidate(tickerName);
+                    System.out.println("get if present===" + Cache.cache.getIfPresent(tickerName));
                     updateTickerState(Cache.Keys.BarTimeFrame.name(), column);
                 }
                 else if(e.getType() == TableModelEvent.UPDATE && column == 2){
@@ -213,7 +206,6 @@ public class MainForm {
 
        // String [] barSizeList = {"1 day", "1 hour", "4 hours", "1 min", "1 day", "1 week", "1 month"};
         //JList barSizeUiList = new JList<>(barSizeList);
-        barSizeUiList.setSelectedIndex(0);
         //stockIndexesListUI.setSelectedIndex(1);
         //stockIndexesListUI.setVisibleRowCount(1);
         //JPanel panelIndexChooser = componentWithLabel("Select index",stockIndexesListUI, null);
@@ -309,20 +301,24 @@ public class MainForm {
         crossPanel.add(componentWithLabel("Short Ema", shortEma, null));
         crossPanel.add(componentWithLabel("Big Ema", longEma,null));
         crossPanel.add(componentWithLabel("Large Ema", largeEmaTextField,null));
-        JCheckBox stopCheckbox = new JCheckBox("Stop checkbox");
-        checkboxAddListener(stopCheckbox);
-        crossPanel.add(componentWithLabel("stop %", stopPercentField,stopCheckbox));
+        crossPanel.add(componentWithLabel("stop %", stopPercentField, null));
         crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma,null));
-        JCheckBox trailingStopCheckbox = new JCheckBox("trailing stop checkbox");
-        crossPanel.add(componentWithLabel("trailing stop %", trailingStopPercentField,trailingStopCheckbox));
-        crossPanel.add(componentWithLabel("bar size settings",barSizeUiList,null));
+
+        crossPanel.add(componentWithLabel("trailing stop %", trailingStopPercentField, null));
+
        // crossPanel.add(componentWithLabel("stock size settings",stockIndexesListUI,null));
         crossPanel.add(strategyCheckbox);
         strategyCheckbox.setSelected(true);
+        Cache.cache.put(Cache.Keys.StrategyEnabled.name(), true);
         strategyCheckbox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                   if( strategyCheckbox.isSelected() ) {
+                       Cache.cache.put(Cache.Keys.StrategyEnabled.name(), true);
+                   }
+                   else {
+                       Cache.cache.put(Cache.Keys.StrategyEnabled.name(), false);
+                   }
             }
         });
         // crossPanel.add(componentWithLabel("strategy checkbox",strategyCheckbox,null));
