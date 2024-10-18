@@ -4,7 +4,9 @@ import com.ib.client.*;
 import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
 import com.trading.cache.Cache;
+import com.trading.data.TradeHistory;
 
+import javax.swing.*;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +15,19 @@ public class PlaceOrderAction extends Action {
     private double accountValue = 10000;
     private double risk = 1;
     private final double stopPercent;
-    private double trailingStopPrice;
+    private final double trailingStopPrice;
 
-    public PlaceOrderAction(EWrapperImpl eWrapperImpl, double accountValue, double risk, double stopPercent, double trailingStopPrice) {
+    public TradeHistory getTradeHistory() {
+        return tradeHistory;
+    }
+
+    private TradeHistory tradeHistory = new TradeHistory();
+
+    private JTextArea textArea;
+
+    public PlaceOrderAction(EWrapperImpl eWrapperImpl, JTextArea textArea , double accountValue, double risk, double stopPercent, double trailingStopPrice) {
         this.wrapper = eWrapperImpl;
+        this.textArea = textArea;
         this.accountValue = accountValue;
         this.risk = risk;
         this.stopPercent = stopPercent;
@@ -30,6 +41,7 @@ public class PlaceOrderAction extends Action {
 
     @Override
     public boolean execute(List<Bar> list, String ticker) {
+
         Utils utils = new Utils();
         int orderId = 0;
         double accountValue = this.accountValue;
@@ -72,12 +84,18 @@ public class PlaceOrderAction extends Action {
         orderId = orderId + 1;
         wrapper.getClient().placeOrder(orderId, contract, order);
         utils.pause(1000);
+
         if (wrapper.getErrorCode() > 0) {
             System.out.println("PlaceOrderAction: error code: " + wrapper.getErrorCode());
             return false;
         }
-
-            utils.pause(2000);
+        utils.pause(2000);
+        String text = textArea.getText();
+        text = text + "\n" + "LONG " + ticker + " Quantity " + String.valueOf(totalQty) +  "  Price " +  price;
+        textArea.setText(text);
+       // tradeHistory.setQuantity(String.valueOf(totalQty));
+        //tradeHistory.setPrice(df.format(price));
+        //tradeHistory.setTicker(ticker);
         // fix trailing
        // Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.Trailing + Cache.Keys.tickersStateMap.name());
 

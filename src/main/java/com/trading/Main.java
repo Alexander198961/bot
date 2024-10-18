@@ -3,10 +3,14 @@ package com.trading;
 import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
 import com.trading.config.GlobalConfiguration;
+import com.trading.data.TradeHistory;
 import com.trading.gui.MainForm;
 import com.trading.scheduler.TaskScheduler;
 
+import javax.swing.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
@@ -17,6 +21,9 @@ public class Main {
         EClientSocket m_client;
         EWrapperImpl wrapper;
         cache.init();
+        List<TradeHistory> list = new ArrayList();
+        Cache.cache.put(Cache.Keys.TradeHistory.name(), list);
+
        // StockScarper stockScarper = new StockScarper();
        // List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
         //List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
@@ -63,8 +70,7 @@ public class Main {
             System.out.println("Couldn't connect");
             System.exit(10);
         }
-        TaskScheduler taskScheduler  = new TaskScheduler(wrapper);
-        taskScheduler.run();
+
 
        // sp500Tickers = new ArrayList<>();
         //sp500Tickers.add("BCOV");
@@ -73,6 +79,9 @@ public class Main {
         //tableWithDropdownForm.display();
         MainForm mainForm = new MainForm();
         mainForm.display();
+        JTextArea textArea = mainForm.getTextArea();
+        TaskScheduler taskScheduler  = new TaskScheduler(wrapper, textArea);
+        taskScheduler.run();
 
 
 

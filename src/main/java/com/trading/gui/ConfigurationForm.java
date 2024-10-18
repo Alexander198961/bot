@@ -60,11 +60,14 @@ public class ConfigurationForm extends CommonForm {
                     System.out.println("Couldn't connect");
                     System.exit(10);
                 }
-                TaskScheduler taskScheduler = new TaskScheduler(wrapper);
+                /*
+                TaskScheduler taskScheduler = new TaskScheduler(wrapper, te);
                 taskScheduler.run();
                 MainForm mainForm = new MainForm();
                 mainForm.display();
                 configurationFrame.setVisible(false);
+                
+                 */
             }
 
 

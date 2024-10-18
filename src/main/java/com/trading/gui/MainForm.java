@@ -32,6 +32,16 @@ public class MainForm extends CommonForm {
     private final JTextField bellowLargeEma = new JTextField();
     private final JTextField stopPercentField = new JTextField();
     private final JTextField capitalField = new JTextField();
+
+    public JTextArea getTextArea() {
+        return textArea;
+    }
+
+    public void setTextArea(JTextArea textArea) {
+        this.textArea = textArea;
+    }
+
+    private JTextArea textArea = new JTextArea(5, 20);
     private final JTextField trailingStopPercentField = new JTextField();
 
 
@@ -131,18 +141,6 @@ public class MainForm extends CommonForm {
 
 
         JFrame frame = new JFrame("Trading scanner");
-        //Object[][] data  = new Object[6][5];
-        //for(int i = 0; i < 6; i++){
-          //  data[i][0] = new Object[]{" ", false, "", "", ""};
-        //}
-       /*
-        Object[][] data = {
-                {"AAPL", false, "100", "10000", "1000"},
-                {"NVDA", false, "50", "5000", "500"},
-                {"TSLA", false, "200", "20000", "2000"}
-        };
-
-        */
         String initUnit = unit.barSize()[0];
         Object[][] data = {
                 {"", false, false ,initUnit,"", "", ""},
@@ -181,7 +179,7 @@ public class MainForm extends CommonForm {
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                Integer row = e.getFirstRow();
+                int row = e.getFirstRow();
                 int column = e.getColumn();
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
                     String tickerName = (String) table.getModel().getValueAt(row,0);
@@ -220,8 +218,7 @@ public class MainForm extends CommonForm {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(600, 900);
         frame.setLayout(new BorderLayout());
-      //  frame.add(panelIndexChooser);
-      //  frame.add(stockIndexesListUI);
+
 
         // Create a button
         JButton showVolumeButton = new JButton("Run Volume scanner");
@@ -249,7 +246,6 @@ public class MainForm extends CommonForm {
         //panel.add(showVolumeButton);
        // panel.add(stockAboveSmaSearchButton);
         crossPanel.setLayout(new BoxLayout(crossPanel, BoxLayout.Y_AXIS));
-        JToggleButton toggleButton = new JToggleButton("Toggle Button");
        // table.getColumnModel().get
        // table.getColumnModel().getColumn(1).setCellRenderer(new MyTableCellRenderer());
         table.getColumnModel().getColumn(1).setCellRenderer(new ToggleSwitchRenderer());
@@ -343,7 +339,7 @@ public class MainForm extends CommonForm {
         frame.add(panel, BorderLayout.NORTH);
         //frame.add(searchCross, BorderLayout.EAST);
         // Create a text area to display the list
-        JTextArea textArea = new JTextArea(5, 20);
+
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
         frame.add(scrollPane, BorderLayout.CENTER);

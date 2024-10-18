@@ -5,12 +5,9 @@ import com.ib.client.Contract;
 import com.ib.client.Decimal;
 import com.ib.client.Order;
 import com.trading.scan.*;
-import com.trading.support.Calculator;
 import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
-import com.trading.support.VolumeCalculator;
-import com.trading.support.reader.TickerReader;
-import com.trading.tickers.FtpDownloader;
+//import com.trading.tickers.FtpDownloader;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -66,8 +63,8 @@ public class OptionTest extends TestSetUp {
     }
     //@Test
     public void testFast(){
-        FtpDownloader ftpDownloader = new FtpDownloader();
-        ftpDownloader.downloadToText();
+//FtpDownloader ftpDownloader = new FtpDownloader();
+    //    ftpDownloader.downloadToText();
         //System.out.println("fast===" + );
     }
     //@Test
@@ -114,7 +111,7 @@ public class OptionTest extends TestSetUp {
     @Test
     public void scannerCross() throws InterruptedException {
         //acmr axdx
-        TickerReader tickerReader = new TickerReader();
+        //TickerReader tickerReader = new TickerReader();
       //  List<String> tickers = tickerReader.tickers();
        Scan scan = new CrossScan(12,26,5, 200);
       // String [] tickers = {"AAL"};

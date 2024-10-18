@@ -10,6 +10,7 @@ import com.trading.scan.PlaceOrderAction;
 import com.trading.scan.Scan;
 import com.trading.scan.TickerEntry;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -19,9 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class TaskScheduler {
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     EWrapperImpl wrapper;
-
-    public TaskScheduler(EWrapperImpl wrapper) {
+    private JTextArea textArea;
+    public TaskScheduler(EWrapperImpl wrapper, JTextArea textArea) {
         this.wrapper = wrapper;
+        this.textArea = textArea;
     }
 
     public void run() {
@@ -42,7 +44,7 @@ public class TaskScheduler {
                         TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
                         List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
                         Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
-                        List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
+                        List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, textArea ,tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
                     } catch (Exception e) {
                         System.out.println("exception=====" + e.getMessage());
                     }
