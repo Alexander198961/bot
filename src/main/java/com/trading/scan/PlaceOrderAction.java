@@ -46,8 +46,8 @@ public class PlaceOrderAction extends Action {
         double price = wrapper.getLastPrice();
         if (price == 0 || price<0) {
             // todo: return it
-            return false;
-           // price = list.get(list.size() -1).close();
+           // return false;
+            price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
         double totalQty = amountToPut / price;
@@ -77,9 +77,12 @@ public class PlaceOrderAction extends Action {
             return false;
         }
 
-        utils.pause(2000);
-        Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.Trailing + Cache.Keys.tickersStateMap.name());
-        if (mapTickersState != null && !mapTickersState.isEmpty() && mapTickersState.get(ticker) != null && mapTickersState.get(ticker).getEnabled() == true) {
+            utils.pause(2000);
+        // fix trailing
+       // Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.Trailing + Cache.Keys.tickersStateMap.name());
+
+
+       // if (mapTickersState != null && !mapTickersState.isEmpty() && mapTickersState.get(ticker) != null && mapTickersState.get(ticker).getEnabled() == true) {
             orderId = orderId + 1;
             order = new Order();
             order.action("SELL");
@@ -89,15 +92,21 @@ public class PlaceOrderAction extends Action {
             order.auxPrice(stopPrice);
             wrapper.getClient().placeOrder(orderId + 1, contract, order);
             utils.pause(1000);
-            orderId = orderId + 1;
-            order = new Order();
-            order.action("SELL");
-            order.orderType(OrderType.TRAIL);
-            order.totalQuantity(Decimal.get(totalQty));
-            order.trailingPercent(trailingStopPrice);
-            wrapper.getClient().placeOrder(orderId + 1, contract, order);
-            utils.pause(2000);
-        }
+            Integer rowNumber = (Integer) Cache.cache.getIfPresent(ticker+ Cache.Keys.RowNumber);
+            if (rowNumber != null) {
+                Entry<Boolean> entryIsEnabled = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.Trailing.name() + rowNumber);
+                if(entryIsEnabled.getEntry().booleanValue()) {
+                    orderId = orderId + 1;
+                    order = new Order();
+                    order.action("SELL");
+                    order.orderType(OrderType.TRAIL);
+                    order.totalQuantity(Decimal.get(totalQty));
+                    order.trailingPercent(trailingStopPrice);
+                    wrapper.getClient().placeOrder(orderId + 1, contract, order);
+                    utils.pause(2000);
+                }
+            }
+      //  }
         //order.trailStopPrice(trailingStopPrice);
         //order.adjustedTrailingAmount();
        // stopPrice = Double.parseDouble(df.format(stopPrice));

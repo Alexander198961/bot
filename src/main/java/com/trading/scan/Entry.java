@@ -1,17 +1,17 @@
 package com.trading.scan;
 
-public class Entry {
-    public Boolean getEnabled() {
-        return isEnabled;
+public class Entry <T> {
+    public T getEntry() {
+        return value;
     }
 
-    private final Boolean isEnabled;
+    private T value;
 
 
 
 
 
-    public Entry(Boolean isEnabled) {
-        this.isEnabled = isEnabled;
+    public void setEntry(T value) {
+        this.value = value;
     }
 }

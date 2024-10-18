@@ -25,16 +25,19 @@ public class EWrapperImpl implements  EWrapper {
     private EClientSocket clientSocket;
     protected int currentOrderId = -1;
 
-    public Set<Bar> getList() {
-        return set;
+
+
+
+
+
+    public void setList(List<Bar> list) {
+        this.list = list;
     }
 
-    public void setList(Set<Bar> set) {
-
-        this.set = set;
+    public List<Bar> getList() {
+        return list;
     }
-
-    private Set<Bar> set = new HashSet<>();
+    private List<Bar> list = new ArrayList<>();
     //! [socket_declare]
 
     //! [socket_init]
@@ -213,11 +216,14 @@ public class EWrapperImpl implements  EWrapper {
     private List<String[]> dataArray = new ArrayList<>();
     @Override
     public void updateMktDepth(int tickerId, int position, int operation, int side, double price, Decimal size) {
+       /*
         String sideType = (side == 0) ? "Buy" : "Sell";
         java.sql.Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String [] dataRow = new String[]{timestamp.toString(),new Integer(position).toString(),new Integer(operation).toString(),sideType,new Double(price).toString(), size.toString() };
         dataArray.add(dataRow);
         System.out.println(EWrapperMsgGenerator.updateMktDepth(tickerId, position, operation, side, price, size));
+
+        */
     }
     //! [updatemktdepth]
 
@@ -252,7 +258,8 @@ public class EWrapperImpl implements  EWrapper {
     //! [historicaldata]
     @Override
     public void historicalData(int reqId, Bar bar) {
-        set.add(bar);
+        list.add(bar);
+        //set.add(bar);
         //System.out.println("bar volume==="+ bar.volume().value());
         System.out.println("HistoricalData:  " + EWrapperMsgGenerator.historicalData(reqId, bar.time(), bar.open(), bar.high(), bar.low(), bar.close(), bar.volume(), bar.count(), bar.wap()));
     }

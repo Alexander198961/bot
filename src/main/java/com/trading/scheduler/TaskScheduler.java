@@ -41,9 +41,8 @@ public class TaskScheduler {
                         EmaConfiguration emaConfiguration = (EmaConfiguration) Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name());
                         TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
                         List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
-                        RequestConfiguration requestConfiguration = (RequestConfiguration) Cache.cache.getIfPresent(Cache.Keys.RequestConfig.name());
                         Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
-                        List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers, requestConfiguration);
+                        List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
                     } catch (Exception e) {
                         System.out.println("exception=====" + e.getMessage());
                     }

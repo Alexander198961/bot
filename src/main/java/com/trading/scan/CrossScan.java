@@ -44,7 +44,12 @@ public class CrossScan extends Scan {
 //        return true;
 
         if (smallEmaList.get(smallEmaSize - 1) > largeEmaList.get(largeEmaSize - 1) && ((ema200Value - ema200Value / 100 * bellowEma) < price)) {
-            return largeEmaList.get(largeEmaSize - 2) > smallEmaList.get(smallEmaSize - 2);
+            if(largeEmaList.get(largeEmaSize - 2) > smallEmaList.get(smallEmaSize - 2)) {
+                return true;
+            }
+            else{
+                return false;
+            }
         }
         return false;
 

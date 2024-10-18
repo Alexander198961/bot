@@ -1,5 +1,6 @@
 package com.trading.gui;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.trading.api.UnitController;
 import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
@@ -58,25 +59,31 @@ public class MainForm extends CommonForm {
         });
     }
 
-    private void updateTickerState( String prefix,int columnNumber){
-        Map<String, Object> tickersStateMap = new HashMap<>();
+    private void updateTickerState( String prefix, int row ,int columnNumber){
+        //Map<String, Object> tickersStateMap = new HashMap<>();
         TableModel tableModel = table.getModel();
         //int columnNumber = 1;
-        for (int i = 0; i < tableModel.getRowCount(); i++) {
-            Object value = tableModel.getValueAt(i,columnNumber);
+        Entry entry = null;
+       // for (int i = 0; i < tableModel.getRowCount(); i++) {
+            Object value = tableModel.getValueAt(row,columnNumber);
             if (value instanceof String) {
-
-                tickersStateMap.put((String) tableModel.getValueAt(i, 0), new BarEntry((String) value));
+                entry = new Entry<String>();
+                entry.setEntry(value);
+               // tickersStateMap.put((String) tableModel.getValueAt(i, 0), new BarEntry((String) value));
             }
             else {
-                tickersStateMap.put((String) tableModel.getValueAt(i, 0), new Entry((Boolean) value));
+
+                entry = new Entry<Boolean>();
+                Boolean isEnabled = (Boolean) value;
+                entry.setEntry(isEnabled);
+               // tickersStateMap.put((String) tableModel.getValueAt(i, 0), new Entry((Boolean) value));
             }
-        }
+       // }
         //
-        Cache.cache.put(prefix +Cache.Keys.tickersStateMap.name(), tickersStateMap);
+        Cache.cache.put(prefix, entry);
     }
 
-    private void updateTickerNameColumn(){
+    private void updateTickerNameColumn( DefaultTableModel model ,int row){
         double riskPercent = Double.parseDouble(riskPercentField.getText());
         double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
         double stopPercent = Double.parseDouble(stopPercentField.getText());
@@ -97,7 +104,8 @@ public class MainForm extends CommonForm {
         tradeConfiguration.setTrailingStop(Double.parseDouble(trailingStopPercentField.getText()));
 
         RequestConfiguration requestConfiguration = new RequestConfiguration();
-
+        Boolean switchState = (Boolean) model.getValueAt(row, 1);
+        Boolean trailingStop = (Boolean) model.getValueAt(row, 1);
         Cache.cache.put(Cache.Keys.RequestConfig.name(), requestConfiguration);
         Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
         Cache.cache.put(Cache.Keys.TradeConfig.name(), tradeConfiguration);
@@ -173,29 +181,29 @@ public class MainForm extends CommonForm {
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                int row = e.getFirstRow();
+                Integer row = e.getFirstRow();
                 int column = e.getColumn();
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
                     String tickerName = (String) table.getModel().getValueAt(row,0);
                     System.out.println("tickerName===" + tickerName);
                     Cache.cache.invalidate(tickerName);
                     System.out.println("get if present===" + Cache.cache.getIfPresent(tickerName));
-                    updateTickerState(Cache.Keys.BarTimeFrame.name(), column);
+                    updateTickerState(Cache.Keys.BarTimeFrame.name() + row ,row, column);
                 }
                 else if(e.getType() == TableModelEvent.UPDATE && column == 2){
-                    updateTickerState(Cache.Keys.Trailing.name(), column);
+                    updateTickerState(Cache.Keys.Trailing.name() + row, row ,  column);
 
                 }
                 else if (e.getType() == TableModelEvent.UPDATE && column == 1) {
-                    updateTickerState(Cache.Keys.IsScheduled.name(),column);
+                    updateTickerState(Cache.Keys.IsScheduled.name() + row,row,column);
 
                 }
                 else if (e.getType() == TableModelEvent.UPDATE && column == 0) {
                     // Get the new value of the edited cell
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
-                    updateTickerNameColumn();
-                    updateTickerState(Cache.Keys.BarTimeFrame.name(), 3);
+                    updateTickerNameColumn(  model, row);
+                    updateTickerState(Cache.Keys.BarTimeFrame.name() + row,row, 3);
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
                 }
             }

@@ -1,6 +1,6 @@
 package com.trading.scan;
 
-public class BarEntry {
+public class BarEntry{
     public BarEntry(String size) {
         this.size = size;
     }
