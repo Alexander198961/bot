@@ -66,7 +66,7 @@ public class ConfigurationForm extends CommonForm {
                 MainForm mainForm = new MainForm();
                 mainForm.display();
                 configurationFrame.setVisible(false);
-                
+
                  */
             }
 
