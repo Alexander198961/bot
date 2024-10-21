@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.ib.client.*;
+import com.trading.api.CustomBar;
 
 //! [ewrapperimpl]
 public class EWrapperImpl implements  EWrapper {
@@ -30,14 +31,14 @@ public class EWrapperImpl implements  EWrapper {
 
 
 
-    public void setList(List<Bar> list) {
+    public void setList(List<CustomBar> list) {
         this.list = list;
     }
 
-    public List<Bar> getList() {
+    public List<CustomBar> getList() {
         return list;
     }
-    private List<Bar> list = new ArrayList<>();
+    private List<CustomBar> list = new ArrayList<>();
     //! [socket_declare]
 
     //! [socket_init]
@@ -258,7 +259,9 @@ public class EWrapperImpl implements  EWrapper {
     //! [historicaldata]
     @Override
     public void historicalData(int reqId, Bar bar) {
-        list.add(bar);
+        CustomBar customBar = new CustomBar(bar.time(),bar.open(),bar.high(),bar.low(),bar.close(),bar.volume(),bar.count(), bar.wap());
+        list.add(customBar);
+        //list.add((CustomBar) bar);
         //set.add(bar);
         //System.out.println("bar volume==="+ bar.volume().value());
         System.out.println("HistoricalData:  " + EWrapperMsgGenerator.historicalData(reqId, bar.time(), bar.open(), bar.high(), bar.low(), bar.close(), bar.volume(), bar.count(), bar.wap()));

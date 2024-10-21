@@ -200,7 +200,7 @@ public class MainForm extends CommonForm {
                     // Get the new value of the edited cell
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
-                    updateTickerNameColumn(  model, row);
+                    updateTickerNameColumn( model, row);
                     updateTickerState(Cache.Keys.BarTimeFrame.name() + row,row, 3);
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
                 }

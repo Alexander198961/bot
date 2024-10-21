@@ -2,10 +2,10 @@ package com.trading.scan;
 
 import com.ib.client.Bar;
 import com.trading.EWrapperImpl;
+import com.trading.api.CustomBar;
 import com.trading.api.USStockContract;
 import com.trading.api.UnitController;
 import com.trading.cache.Cache;
-import com.trading.config.RequestConfiguration;
 
 import java.time.Instant;
 import java.util.*;
@@ -19,7 +19,7 @@ public abstract class Scan {
         unit.init();
     }
 
-    private boolean isListValid(Collection<Bar> list, String ticker) {
+    private boolean isListValid(List<CustomBar> list, String ticker) {
         if (list.size() < 3) {
             System.err.println("ticker===" + ticker);
             return false;
@@ -47,6 +47,8 @@ public abstract class Scan {
             i++;
 
 
+
+
             if (ticker == null || ticker.isEmpty()) {
                 continue;
             }
@@ -63,9 +65,7 @@ public abstract class Scan {
 
             Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i.toString());
             String barSize = entry.getEntry();
-
-
-           // Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
+            Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
            // String barSize = "1 day";
            // todo temp disabled bug !!!!
 
@@ -93,7 +93,7 @@ public abstract class Scan {
                 if (!utils.isConnected(wrapper)) {
                     tickersMeetCriteria.add("Not connected");
                 }
-                List<Bar> list = wrapper.getList();
+                List<CustomBar> list = wrapper.getList();
                 if (!isListValid(list, ticker)) {
                     continue;
                 }
@@ -112,7 +112,7 @@ public abstract class Scan {
                 long epochTimeCurrent = Instant.now().getEpochSecond();
                 if (epochTimeCurrent > (epochTimeLastRunSecond + barSizeSeconds)) {
                     System.out.println("read from cache===");
-                    List<Bar> list = (List<Bar>) Cache.cache.getIfPresent(ticker);
+                    List<CustomBar> list = (List<CustomBar>) Cache.cache.getIfPresent(ticker);
                     assert list != null;
                     if(list.size()> 3000){
                         list.subList(0,2000).clear();
@@ -122,9 +122,11 @@ public abstract class Scan {
                     wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", period, barSize, "TRADES", 1, 1, false, null);
                     utils.pause(1000);
                     assert list != null;
-                    List<Bar> addedlist = wrapper.getList();
-                    for (Bar bar : addedlist) {
+                    List<CustomBar> addedlist = wrapper.getList();
+                    for (CustomBar bar : addedlist) {
                         if(!list.contains(bar)) {
+                            System.out.println("addedlist==="+ list.get(list.size()-1).time());
+                            System.out.println(bar.time());
                             list.add(bar);
                         }
                     }
@@ -149,7 +151,7 @@ public abstract class Scan {
     }
 
  // todo : maybe place multiple orders
-    public Collection<String> check(Collection<Bar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
+    public Collection<String> check(List<CustomBar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
 
         if (criteriaIsMeet(new ArrayList<>(list))) {
             if (action.execute(new ArrayList<>(list), ticker)) {

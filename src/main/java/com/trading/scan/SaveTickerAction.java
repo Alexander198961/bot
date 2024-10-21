@@ -1,10 +1,9 @@
 package com.trading.scan;
 
-import com.google.common.base.Ticker;
 import com.ib.client.Bar;
+import com.trading.api.CustomBar;
 import com.trading.cache.Cache;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SaveTickerAction extends Action {
@@ -25,7 +24,7 @@ public class SaveTickerAction extends Action {
         return false;
     }
 
-    public void saveToCache(Collection<Bar> list, String ticker, Long epochTimeCurrent) {
+    public void saveToCache(List<CustomBar> list, String ticker, Long epochTimeCurrent) {
         Cache.cache.put(Cache.Keys.LastRun.name() + ticker, epochTimeCurrent);
         Cache.cache.put(ticker, list);
     }

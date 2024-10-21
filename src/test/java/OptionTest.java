@@ -4,6 +4,7 @@ import com.ib.client.Bar;
 import com.ib.client.Contract;
 import com.ib.client.Decimal;
 import com.ib.client.Order;
+import com.trading.api.CustomBar;
 import com.trading.scan.*;
 import com.trading.support.EMACalculator;
 //import com.trading.support.SMACalculator;
@@ -74,7 +75,7 @@ public class OptionTest extends TestSetUp {
         Thread.sleep(3000);
        // Calculator calculator = new VolumeCalculator();
         //calculator.calculate(wrapper.getList());
-        List<Bar> list = (List<Bar>) wrapper.getList();
+        List<CustomBar> list = (List<CustomBar>) wrapper.getList();
         EMACalculator smaCalculator = new EMACalculator();
         double smaLastValue= smaCalculator.calculate(new ArrayList<>(
                 wrapper.getList()), 200);
