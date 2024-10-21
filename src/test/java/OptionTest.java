@@ -120,7 +120,7 @@ public class OptionTest extends TestSetUp {
        for(String ticker : tickers){
            list.add(ticker);
        }
-       Action action = new PlaceOrderAction(wrapper, 10000, 10, 10, 5);
+       Action action = new PlaceOrderAction(wrapper, null,10000, 10, 10, 5);
        scan.scan(wrapper,action,list);
            //scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 10, 10, 5), list);
 
