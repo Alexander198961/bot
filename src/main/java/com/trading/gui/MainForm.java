@@ -7,6 +7,7 @@ import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
 import com.trading.scan.BarEntry;
+import com.trading.scan.CleanCacheAction;
 import com.trading.scan.Entry;
 import com.trading.scan.TickerEntry;
 
@@ -93,7 +94,10 @@ public class MainForm extends CommonForm {
         Cache.cache.put(prefix, entry);
     }
 
+
+
     private void updateTickerNameColumn( DefaultTableModel model ,int row){
+
         double riskPercent = Double.parseDouble(riskPercentField.getText());
         double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
         double stopPercent = Double.parseDouble(stopPercentField.getText());
@@ -155,6 +159,7 @@ public class MainForm extends CommonForm {
         }
 
 
+        CleanCacheAction cleanCacheAction = new CleanCacheAction();
 
         String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "Quantity", "Position Size", "PNL"};
 
@@ -184,7 +189,8 @@ public class MainForm extends CommonForm {
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
                     String tickerName = (String) table.getModel().getValueAt(row,0);
                     System.out.println("tickerName===" + tickerName);
-                    Cache.cache.invalidate(tickerName);
+                    cleanCacheAction.execute(new ArrayList<>(), tickerName);
+                    //Cache.cache.invalidate(tickerName);
                     System.out.println("get if present===" + Cache.cache.getIfPresent(tickerName));
                     updateTickerState(Cache.Keys.BarTimeFrame.name() + row ,row, column);
                 }

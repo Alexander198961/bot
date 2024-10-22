@@ -54,13 +54,13 @@ public abstract class Scan {
                 continue;
             }
             else{
-             Entry<Boolean> entry = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.IsScheduled.name() + i.toString());
+             Entry<Boolean> entry = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.IsScheduled.name() + i);
              if (entry.getEntry() == false) {
                  continue;
              }
             }
 
-            Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i.toString());
+            Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i);
             String barSize = entry.getEntry();
             Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
            // String barSize = "1 day";
