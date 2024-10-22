@@ -16,11 +16,10 @@ public class IBSignalHandler implements Runnable{
         this.host = host;
     }
     EClientSocket m_client;
-    private EWrapperImpl wrapper;
+    private final EWrapperImpl wrapper;
 
     @Override
     public void run() {
-
         m_client = wrapper.getClient();
         final EReaderSignal m_signal = wrapper.getSignal();
         m_client.eConnect(host, port, 0);

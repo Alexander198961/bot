@@ -48,6 +48,7 @@ public class ConfigurationForm extends CommonForm {
                 int portIbkr = globalConfiguration.getPort();
                 assert portIbkr > 0;
                 assert !host.isEmpty();
+                /*
                 wrapper = new EWrapperImpl();
                 IBSignalHandler ibSignalHandler = new IBSignalHandler(wrapper, portIbkr, host);
                 ibSignalHandler.run();
@@ -60,6 +61,8 @@ public class ConfigurationForm extends CommonForm {
                     System.out.println("Couldn't connect");
                     System.exit(10);
                 }
+                */
+
                 /*
                 TaskScheduler taskScheduler = new TaskScheduler(wrapper, te);
                 taskScheduler.run();

@@ -4,6 +4,9 @@ import com.ib.client.EClientSocket;
 import com.trading.cache.Cache;
 import com.trading.config.GlobalConfiguration;
 import com.trading.data.TradeHistory;
+import com.trading.gui.CommonForm;
+import com.trading.gui.ConfigurationForm;
+import com.trading.gui.HostPortInputDialog;
 import com.trading.gui.MainForm;
 import com.trading.scheduler.TaskScheduler;
 
@@ -51,9 +54,20 @@ public class Main {
         String host =properties.getProperty("host");
 
          */
-        GlobalConfiguration globalConfiguration = new GlobalConfiguration();
-        String host= globalConfiguration.getHost();
-        int port=globalConfiguration.getPort();
+        //ConfigurationForm configurationForm = new ConfigurationForm();
+       // configurationForm.show();
+        //SwingUtilities.invokeLater()
+
+        HostPortInputDialog dialog = new HostPortInputDialog(null);
+        dialog.setVisible(true);
+
+        System.out.println("dialog===="+dialog.getPort());
+        System.out.println("dialog===="+dialog.getHost());
+       // GlobalConfiguration globalConfiguration = new GlobalConfiguration();
+       // String host= globalConfiguration.getHost();
+       // int port=globalConfiguration.getPort();
+        String host= dialog.getHost();
+        Integer port = dialog.getPort();
         System.out.println("ib tws port="+ port);
         System.out.println("ib tws host="+ host);
         assert port>0;
