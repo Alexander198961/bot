@@ -35,24 +35,26 @@ public class TaskScheduler {
             @Override
             public void run() {
                 //Cache.cache.getIfPresent(Cache.Keys.StrategyEnabled.name());
-                    if (Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name()) != null && Cache.cache.getIfPresent(Cache.Keys.Tickers.name()) != null) {
-                    System.out.println("inside: ");
+                    if((Boolean) Cache.cache.getIfPresent(Cache.Keys.StrategyEnabled.name())) {
+                        if (Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name()) != null && Cache.cache.getIfPresent(Cache.Keys.Tickers.name()) != null) {
+                            System.out.println("inside: ");
 
-                    try {
+                            try {
 
-                        EmaConfiguration emaConfiguration = (EmaConfiguration) Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name());
-                        TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
-                        List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
-                        Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
-                        List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, textArea ,tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
-                    } catch (Exception e) {
-                        System.out.println("exception=====" + e.getMessage());
+                                EmaConfiguration emaConfiguration = (EmaConfiguration) Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name());
+                                TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
+                                List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
+                                Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
+                                List<String> list = scanner.scan(wrapper, new PlaceOrderAction(wrapper, textArea, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
+                            } catch (Exception e) {
+                                System.out.println("exception=====" + e.getMessage());
+                            }
+                        } else {
+
+
+                            System.out.println("Task executed at: " + System.currentTimeMillis());
+                        }
                     }
-                } else {
-
-
-                    System.out.println("Task executed at: " + System.currentTimeMillis());
-                }
             }
         }, 0, 5, TimeUnit.SECONDS);
         System.out.println("Task ENDED: " + System.currentTimeMillis());

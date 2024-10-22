@@ -313,7 +313,7 @@ public class MainForm extends CommonForm {
        // crossPanel.add(componentWithLabel("stock size settings",stockIndexesListUI,null));
         crossPanel.add(strategyCheckbox);
         strategyCheckbox.setSelected(true);
-        Cache.cache.put(Cache.Keys.StrategyEnabled.name(), true);
+
         strategyCheckbox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

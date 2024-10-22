@@ -41,7 +41,7 @@ public class OptionTest extends TestSetUp {
 
     }
 
-    @Test
+   // @Test
     public void testDownload(){
 
     }

@@ -46,9 +46,6 @@ public abstract class Scan {
         for (String ticker : tickers) {
             i++;
 
-
-
-
             if (ticker == null || ticker.isEmpty()) {
                 continue;
             }
@@ -68,10 +65,6 @@ public abstract class Scan {
             Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
            // String barSize = "1 day";
            // todo temp disabled bug !!!!
-
-
-
-
              //
             wrapper.setList(new ArrayList<>());
            // String barSize = "1 day";
@@ -121,7 +114,6 @@ public abstract class Scan {
                     assert period!= null;
                     wrapper.getClient().reqHistoricalData(1010, new USStockContract(ticker), "", period, barSize, "TRADES", 1, 1, false, null);
                     utils.pause(1000);
-                    assert list != null;
                     List<CustomBar> addedlist = wrapper.getList();
                     for (CustomBar bar : addedlist) {
                         if(!list.contains(bar)) {

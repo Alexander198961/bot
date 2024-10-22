@@ -23,7 +23,7 @@ public class Main {
         cache.init();
         List<TradeHistory> list = new ArrayList();
         Cache.cache.put(Cache.Keys.TradeHistory.name(), list);
-
+        Cache.cache.put(Cache.Keys.StrategyEnabled.name(), true);
        // StockScarper stockScarper = new StockScarper();
        // List<String> sp500List = stockScarper.fetch("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",0);
         //List<String> dowStocks = stockScarper.fetch("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average",1);
@@ -63,7 +63,6 @@ public class Main {
         ibSignalHandler.run();
         m_client = wrapper.getClient();
         assert m_client.isConnected();
-
         if (m_client.isConnected()) {
             System.out.println("Connected to TWS");
         }else{
@@ -82,8 +81,6 @@ public class Main {
         JTextArea textArea = mainForm.getTextArea();
         TaskScheduler taskScheduler  = new TaskScheduler(wrapper, textArea);
         taskScheduler.run();
-
-
 
     }
 
