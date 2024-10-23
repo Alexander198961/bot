@@ -18,10 +18,10 @@ public class UnitController {
                 return initMapPeriod;
         }
 
-        final String [] barSize = {"1 min", "2 mins","1 hour", "1 day", "1 month" , "1 week"};
-        final Long [] timeSecondsValues = {60L,120L,3600L, 86400L,  31536000L, 604800L   };
-        final String[] periodValues = {"5 D", "8 D", "50 D", "240 D", "320 D", "320 D"};
-        final String [] shortPeriodValuesFromCache = {"120 S", "130 S", "7200 S", "2 D", "2 M", "2 W"};
+        final String [] barSize = {"1 min", "2 mins", "5 mins", "15 mins" , "30 mins", "1 hour", "1 day", "1 month" , "1 week"};
+        final Long [] timeSecondsValues = {60L,120L, 300L , 900L, 1800L , 3600L,   86400L,  31536000L, 604800L   };
+        final String[] periodValues = {"5 D", "8 D", "8 D" , "8 D" , "8 D" , "50 D", "240 D", "320 D", "320 D"};
+        final String [] shortPeriodValuesFromCache = {"120 S", "130 S", "310 S", "910 S" , "1810 S" ,  "7200 S", "2 D", "2 M", "2 W"};
         private Map<String, String> initMapPeriod = new HashMap<>();
 
         public Map<String, String> getShortPeriodMap() {
