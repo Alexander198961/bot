@@ -127,7 +127,7 @@ public class PlaceOrderAction extends Action {
             Integer rowNumber = (Integer) Cache.cache.getIfPresent(ticker+ Cache.Keys.RowNumber);
             if (rowNumber != null) {
                 Entry<Boolean> entryIsEnabled = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.Trailing.name() + rowNumber);
-                if(entryIsEnabled.getEntry().booleanValue()) {
+                if(entryIsEnabled !=null && entryIsEnabled.getEntry() !=null && entryIsEnabled.getEntry().booleanValue()) {
                     orderId = orderId + 1;
                     order = new Order();
                     order.action("SELL");

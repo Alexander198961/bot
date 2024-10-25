@@ -213,8 +213,11 @@ public class MainForm extends CommonForm {
                 }
                 else if (e.getType() == TableModelEvent.UPDATE && column == 0) {
                     // Get the new value of the edited cell
+                    defaultTableModel.setValueAt("",row,4);
+                    defaultTableModel.setValueAt("",row,5);
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
+                    cleanCacheAction.execute(new ArrayList<>(), (String)newValue);
                     updateTickerNameColumn( model, row);
                     updateTickerState(Cache.Keys.BarTimeFrame.name() + row,row, 3);
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
