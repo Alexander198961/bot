@@ -42,9 +42,11 @@ public abstract class Scan {
        // Map<String, Entry> mapTickersState = (Map) Cache.cache.getIfPresent(Cache.Keys.IsScheduled + Cache.Keys.tickersStateMap.name());
 
        // Cache.cache.getIfPresent(Cache.Keys.IsScheduled )
+
         Integer i=-1;
         for (String ticker : tickers) {
             i++;
+
 
             if (ticker == null || ticker.isEmpty()) {
                 continue;
@@ -63,7 +65,11 @@ public abstract class Scan {
             Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i);
             String barSize = entry.getEntry();
             Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
-           // String barSize = "1 day";
+
+
+
+
+          // String barSize = "1 day";
            // todo temp disabled bug !!!!
              //
             wrapper.setList(new ArrayList<>());

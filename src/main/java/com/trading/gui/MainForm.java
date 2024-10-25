@@ -94,7 +94,15 @@ public class MainForm extends CommonForm {
         Cache.cache.put(prefix, entry);
     }
 
+    public DefaultTableModel getDefaultTableModel() {
+        return defaultTableModel;
+    }
 
+    public void setDefaultTableModel(DefaultTableModel defaultTableModel) {
+        this.defaultTableModel = defaultTableModel;
+    }
+
+    private DefaultTableModel defaultTableModel;
 
     private void updateTickerNameColumn( DefaultTableModel model ,int row){
 
@@ -181,6 +189,7 @@ public class MainForm extends CommonForm {
                 return super.getColumnClass(columnIndex);
             }
         };
+        setDefaultTableModel(model);
         model.addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -191,7 +200,7 @@ public class MainForm extends CommonForm {
                     System.out.println("tickerName===" + tickerName);
                     cleanCacheAction.execute(new ArrayList<>(), tickerName);
                     //Cache.cache.invalidate(tickerName);
-                    System.out.println("get if present===" + Cache.cache.getIfPresent(tickerName));
+
                     updateTickerState(Cache.Keys.BarTimeFrame.name() + row ,row, column);
                 }
                 else if(e.getType() == TableModelEvent.UPDATE && column == 2){

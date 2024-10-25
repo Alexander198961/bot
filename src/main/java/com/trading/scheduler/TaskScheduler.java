@@ -5,6 +5,7 @@ import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
+import com.trading.gui.MainForm;
 import com.trading.scan.CrossScan;
 import com.trading.scan.PlaceOrderAction;
 import com.trading.scan.Scan;
@@ -21,9 +22,11 @@ public class TaskScheduler {
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private EWrapperImpl wrapper;
     private JTextArea textArea;
-    public TaskScheduler(EWrapperImpl wrapper, JTextArea textArea) {
+    private MainForm mainForm;
+    public TaskScheduler(EWrapperImpl wrapper, JTextArea textArea, MainForm mainForm ) {
         this.wrapper = wrapper;
         this.textArea = textArea;
+        this.mainForm = mainForm;
     }
 
     public void run() {
@@ -38,13 +41,13 @@ public class TaskScheduler {
                     if((Boolean) Cache.cache.getIfPresent(Cache.Keys.StrategyEnabled.name())) {
                         if (Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name()) != null && Cache.cache.getIfPresent(Cache.Keys.Tickers.name()) != null) {
                             System.out.println("inside: ");
-
                             try {
+
                                 EmaConfiguration emaConfiguration = (EmaConfiguration) Cache.cache.getIfPresent(Cache.Keys.EmaConfig.name());
                                 TradeConfiguration tradeConfiguration = (TradeConfiguration) Cache.cache.getIfPresent(Cache.Keys.TradeConfig.name());
                                 List<String> tickers = (List<String>) Cache.cache.getIfPresent(Cache.Keys.Tickers.name());
                                 Scan scanner = new CrossScan(emaConfiguration.getShortEmaValue(), emaConfiguration.getLongEmaValue(), emaConfiguration.getBellowEmaPercent(), emaConfiguration.getLargeEma());
-                                scanner.scan(wrapper, new PlaceOrderAction(wrapper, textArea, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop()), tickers);
+                                scanner.scan(wrapper, new PlaceOrderAction(wrapper, textArea, tradeConfiguration.getCapital(), tradeConfiguration.getRiskPercent(), tradeConfiguration.getStopPercent(), tradeConfiguration.getTrailingStop(), mainForm), tickers);
                             } catch (Exception e) {
                                 System.out.println("exception=====" + e.getMessage());
                             }

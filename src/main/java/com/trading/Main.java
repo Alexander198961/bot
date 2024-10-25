@@ -91,9 +91,10 @@ public class Main {
         //TableWithDropdownForm tableWithDropdownForm = new TableWithDropdownForm();
         //tableWithDropdownForm.display();
         MainForm mainForm = new MainForm();
+
         mainForm.display();
         JTextArea textArea = mainForm.getTextArea();
-        TaskScheduler taskScheduler  = new TaskScheduler(wrapper, textArea);
+        TaskScheduler taskScheduler  = new TaskScheduler(wrapper, textArea, mainForm);
         taskScheduler.run();
 
     }

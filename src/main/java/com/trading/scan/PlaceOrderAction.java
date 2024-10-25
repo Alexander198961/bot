@@ -5,8 +5,10 @@ import com.trading.EWrapperImpl;
 import com.trading.api.USStockContract;
 import com.trading.cache.Cache;
 import com.trading.data.TradeHistory;
+import com.trading.gui.MainForm;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +26,10 @@ public class PlaceOrderAction extends Action {
     private TradeHistory tradeHistory = new TradeHistory();
 
     private JTextArea textArea;
+    private MainForm mainForm;
 
-    public PlaceOrderAction(EWrapperImpl eWrapperImpl, JTextArea textArea , double accountValue, double risk, double stopPercent, double trailingStopPrice) {
+    public PlaceOrderAction(EWrapperImpl eWrapperImpl, JTextArea textArea , double accountValue, double risk, double stopPercent, double trailingStopPrice, MainForm mainForm) {
+        this.mainForm = mainForm;
         this.wrapper = eWrapperImpl;
         this.textArea = textArea;
         this.accountValue = accountValue;
@@ -84,12 +88,22 @@ public class PlaceOrderAction extends Action {
         orderId = orderId + 1;
         wrapper.getClient().placeOrder(orderId, contract, order);
         utils.pause(1000);
-
         if (wrapper.getErrorCode() > 0) {
             System.out.println("PlaceOrderAction: error code: " + wrapper.getErrorCode());
             return false;
         }
         utils.pause(2000);
+        DefaultTableModel defaultTableModel = mainForm.getDefaultTableModel();
+        int row=0;
+        for(int i=0;i<list.size();i++) {
+          String value = (String) defaultTableModel.getValueAt(i,0);
+          if(value.equals(ticker)) {
+              break;
+          }
+          row=row+1;
+        }
+        defaultTableModel.setValueAt(totalQty,row,4);
+        defaultTableModel.setValueAt(totalQty* price ,row,5);
         String text = textArea.getText();
         text = text + "\n" + "LONG " + ticker + " Quantity " + String.valueOf(totalQty) +  "  Price " +  price;
         textArea.setText(text);
