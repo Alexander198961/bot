@@ -155,11 +155,11 @@ public class MainForm extends CommonForm {
         JFrame frame = new JFrame("Trading scanner");
         String initUnit = unit.barSize()[0];
         Object[][] data = {
-                {"", false, false ,initUnit,"", "", ""},
-                {"", false, false ,initUnit, "" ,"", ""},
-                {"", false, false , initUnit, "","", ""},
-                {"", false, false ,initUnit , "","", ""},
-                {"", false, false , initUnit, "","", ""},
+                {"", false, false ,initUnit,"","", "", ""},
+                {"", false, false ,initUnit, "" ,"","", ""},
+                {"", false, false , initUnit, "","","", ""},
+                {"", false, false ,initUnit , "","","", ""},
+                {"", false, false , initUnit, "","","", ""},
         };
 
         for(int i =0 ; i < data.length ; i++){
@@ -169,7 +169,7 @@ public class MainForm extends CommonForm {
 
         CleanCacheAction cleanCacheAction = new CleanCacheAction();
 
-        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "Quantity", "Position Size", "PNL"};
+        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "Quantity", "Position Size" ,"PNL"};
 
         // Create a table model and make the first column editable
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {

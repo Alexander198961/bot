@@ -41,7 +41,9 @@ public class HostPortInputDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 submitted = false;
-                dispose(); // close the dialog
+                dispose();
+                System.exit(10);
+                // close the dialog
             }
         });
 
