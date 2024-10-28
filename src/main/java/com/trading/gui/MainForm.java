@@ -74,7 +74,7 @@ public class MainForm extends CommonForm {
         //Map<String, Object> tickersStateMap = new HashMap<>();
         TableModel tableModel = table.getModel();
         //int columnNumber = 1;
-        Entry entry = null;
+        Entry entry;
        // for (int i = 0; i < tableModel.getRowCount(); i++) {
             Object value = tableModel.getValueAt(row,columnNumber);
             if (value instanceof String) {
@@ -126,14 +126,10 @@ public class MainForm extends CommonForm {
         tradeConfiguration.setTrailingStop(Double.parseDouble(trailingStopPercentField.getText()));
 
         RequestConfiguration requestConfiguration = new RequestConfiguration();
-        Boolean switchState = (Boolean) model.getValueAt(row, 1);
-        Boolean trailingStop = (Boolean) model.getValueAt(row, 1);
         Cache.cache.put(Cache.Keys.RequestConfig.name(), requestConfiguration);
         Cache.cache.put(Cache.Keys.Tickers.name(), Arrays.asList(tickersArray));
         Cache.cache.put(Cache.Keys.TradeConfig.name(), tradeConfiguration);
         Cache.cache.put(Cache.Keys.EmaConfig.name(), emaConfiguration);
-        TableModel tableModel = table.getModel();
-
 
 
         //updateTickerState();
@@ -169,13 +165,13 @@ public class MainForm extends CommonForm {
 
         CleanCacheAction cleanCacheAction = new CleanCacheAction();
 
-        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "Quantity", "Position Size" ,"PNL"};
+        String[] columnNames = {"Tickers", "ON/OFF Switch", "TRAILING STOP" , "TIME FRAME", "OPEN OR CLOSED","Quantity", "Position Size" ,"PNL"};
 
         // Create a table model and make the first column editable
         DefaultTableModel model = new DefaultTableModel(data, columnNames) {
 
             public boolean isCellEditable(int row, int column) {
-                return column == 0 || column == 1 || column == 2 || column == 3 ;
+                return column == 0 || column == 1 || column == 2 || column == 3 || column == 4 ;
                // return column == 1; // Only allow editing the ON/OFF Switch column
             }
 
@@ -195,6 +191,9 @@ public class MainForm extends CommonForm {
             public void tableChanged(TableModelEvent e) {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
+                if(e.getType() == TableModelEvent.UPDATE && column == 4){
+                    updateTickerState(Cache.Keys.BarStateExecution.name()+ row ,row, column);
+                }
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
                     String tickerName = (String) table.getModel().getValueAt(row,0);
                     System.out.println("tickerName===" + tickerName);
@@ -273,7 +272,9 @@ public class MainForm extends CommonForm {
         table.getColumnModel().getColumn(2).setCellEditor(new ToggleSwitchEditor());
         System.out.println("bar size==="+unit.barSize());
         JComboBox<String> comboBox = new JComboBox<>(unit.barSize());
+        JComboBox<String> barState= new JComboBox<>(new String[]{"OPEN", "CLOSED"});
         table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox));
+        table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(barState));
         //table.getColumnModel
        // updateTickerState(Cache.Keys.BarTimeFrame.name(), 3);
 

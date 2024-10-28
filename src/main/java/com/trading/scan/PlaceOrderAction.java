@@ -62,8 +62,8 @@ public class PlaceOrderAction extends Action {
         double price = wrapper.getLastPrice();
         if (price == 0 || price<0) {
             // todo: return it
-           // return false;
-            price = list.get(list.size() -1).close();
+            return false;
+           // price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
         double totalQty = amountToPut / price;
@@ -102,8 +102,8 @@ public class PlaceOrderAction extends Action {
           }
           row=row+1;
         }
-        defaultTableModel.setValueAt(totalQty,row,4);
-        defaultTableModel.setValueAt(totalQty* price ,row,5);
+        defaultTableModel.setValueAt(totalQty,row,5);
+        defaultTableModel.setValueAt(totalQty* price ,row,6);
         String text = textArea.getText();
         text = text + "\n" + "LONG " + ticker + " Quantity " + String.valueOf(totalQty) +  "  Price " +  price;
         textArea.setText(text);
