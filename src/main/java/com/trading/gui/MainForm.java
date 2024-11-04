@@ -1,15 +1,12 @@
 package com.trading.gui;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.trading.api.UnitController;
 import com.trading.cache.Cache;
 import com.trading.config.EmaConfiguration;
 import com.trading.config.RequestConfiguration;
 import com.trading.config.TradeConfiguration;
-import com.trading.scan.BarEntry;
 import com.trading.scan.CleanCacheAction;
 import com.trading.scan.Entry;
-import com.trading.scan.TickerEntry;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -22,10 +19,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
 import java.util.List;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import  com.trading.config.BarStateExecution;
 public class MainForm extends CommonForm {
 
     private JTable table;
@@ -104,7 +102,7 @@ public class MainForm extends CommonForm {
 
     private DefaultTableModel defaultTableModel;
 
-    private void updateTickerNameColumn( DefaultTableModel model ,int row){
+    private void updateTickerNameColumn( int row){
 
         double riskPercent = Double.parseDouble(riskPercentField.getText());
         double bellowEmaPercent = Double.parseDouble(bellowLargeEma.getText());
@@ -151,15 +149,23 @@ public class MainForm extends CommonForm {
         JFrame frame = new JFrame("Trading scanner");
         String initUnit = unit.barSize()[0];
         Object[][] data = {
-                {"", false, false ,initUnit,"","", "", ""},
-                {"", false, false ,initUnit, "" ,"","", ""},
-                {"", false, false , initUnit, "","","", ""},
-                {"", false, false ,initUnit , "","","", ""},
-                {"", false, false , initUnit, "","","", ""},
+                {"", false, false ,initUnit,false,"", "", ""},
+                {"", false, false ,initUnit, false ,"","", ""},
+                {"", false, false , initUnit, false,"","", ""},
+                {"", false, false ,initUnit , false,"","", ""},
+                {"", false, false , initUnit, false,"","", ""},
         };
 
         for(int i =0 ; i < data.length ; i++){
             tickersArray[i]="";
+            Entry<Boolean> entry = new Entry<>();
+            entry.setEntry(false);
+            Cache.cache.put(Cache.Keys.BarStateExecution.name() + new Integer(i), entry);
+            entry = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.BarStateExecution.name() + new Integer(i));
+            System.out.println("entry===" + entry);
+
+
+            // Cache.Keys.BarStateExecution.name()+
         }
 
 
@@ -182,6 +188,7 @@ public class MainForm extends CommonForm {
                 if (columnIndex == 1 || columnIndex == 2) {
                     return Boolean.class; // Set the ON/OFF Switch column as Boolean
                 }
+
                 return super.getColumnClass(columnIndex);
             }
         };
@@ -193,10 +200,11 @@ public class MainForm extends CommonForm {
                 int column = e.getColumn();
                 if(e.getType() == TableModelEvent.UPDATE && column == 4){
                     updateTickerState(Cache.Keys.BarStateExecution.name()+ row ,row, column);
+
                 }
                 if(e.getType() == TableModelEvent.UPDATE && column == 3){
                     String tickerName = (String) table.getModel().getValueAt(row,0);
-                    System.out.println("tickerName===" + tickerName);
+
                     cleanCacheAction.execute(new ArrayList<>(), tickerName);
                     //Cache.cache.invalidate(tickerName);
 
@@ -212,12 +220,12 @@ public class MainForm extends CommonForm {
                 }
                 else if (e.getType() == TableModelEvent.UPDATE && column == 0) {
                     // Get the new value of the edited cell
-                    defaultTableModel.setValueAt("",row,4);
                     defaultTableModel.setValueAt("",row,5);
+                    defaultTableModel.setValueAt("",row,6);
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
                     cleanCacheAction.execute(new ArrayList<>(), (String)newValue);
-                    updateTickerNameColumn( model, row);
+                    updateTickerNameColumn(row);
                     updateTickerState(Cache.Keys.BarTimeFrame.name() + row,row, 3);
                     System.out.println("Cell edited at row " + row + ", column " + column + ": " + newValue);
                 }
@@ -265,16 +273,34 @@ public class MainForm extends CommonForm {
         crossPanel.setLayout(new BoxLayout(crossPanel, BoxLayout.Y_AXIS));
        // table.getColumnModel().get
        // table.getColumnModel().getColumn(1).setCellRenderer(new MyTableCellRenderer());
-        table.getColumnModel().getColumn(1).setCellRenderer(new ToggleSwitchRenderer());
-        table.getColumnModel().getColumn(1).setCellEditor(new ToggleSwitchEditor());
+        table.getColumnModel().getColumn(1).setCellRenderer(new ToggleSwitchRenderer("ON", "OFF"));
+        table.getColumnModel().getColumn(1).setCellEditor(new ToggleSwitchEditor("ON", "OFF"));
 
-        table.getColumnModel().getColumn(2).setCellRenderer(new ToggleSwitchRenderer());
-        table.getColumnModel().getColumn(2).setCellEditor(new ToggleSwitchEditor());
+        table.getColumnModel().getColumn(2).setCellRenderer(new ToggleSwitchRenderer("ON", "OFF"));
+        table.getColumnModel().getColumn(2).setCellEditor(new ToggleSwitchEditor("ON", "OFF"));
         System.out.println("bar size==="+unit.barSize());
         JComboBox<String> comboBox = new JComboBox<>(unit.barSize());
-        JComboBox<String> barState= new JComboBox<>(new String[]{"OPEN", "CLOSED"});
+        String [] bars = new String[]{BarStateExecution.OPEN.name(), BarStateExecution.CLOSED.name()};
+        JComboBox<String> barState= new JComboBox<String>(bars);
+        barState.setSelectedIndex(0);
         table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(comboBox));
-        table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(barState));
+        table.getColumnModel().getColumn(4).setCellRenderer(new ToggleSwitchRenderer("OPEN", "CLOSED"));
+        table.getColumnModel().getColumn(4).setCellEditor(new ToggleSwitchEditor("OPEN", "CLOSED"));
+        //table.getColumnModel().getColumn(4).setCellEditor((TableCellEditor) new ToggleSwitchRenderer());
+       // table.getColumnModel().getColumn(4).setCellEditor(new DefaultCellEditor(barState));
+        /*
+        table.getColumnModel().getColumn(4).setCellRenderer(new TableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                                                           boolean hasFocus, int row, int column) {
+                if (value instanceof String) {
+                    barState.setSelectedItem(value);  // Set selected item based on cell value
+                }
+                return barState;
+            }
+        });
+
+         */
         //table.getColumnModel
        // updateTickerState(Cache.Keys.BarTimeFrame.name(), 3);
 
@@ -326,7 +352,6 @@ public class MainForm extends CommonForm {
         crossPanel.add(componentWithLabel("Large Ema", largeEmaTextField,null));
         crossPanel.add(componentWithLabel("stop %", stopPercentField, null));
         crossPanel.add(componentWithLabel("bellow Large Ema %", bellowLargeEma,null));
-
         crossPanel.add(componentWithLabel("trailing stop %", trailingStopPercentField, null));
 
        // crossPanel.add(componentWithLabel("stock size settings",stockIndexesListUI,null));
@@ -417,8 +442,14 @@ public class MainForm extends CommonForm {
 }
 
 
+
  class ToggleSwitchRenderer extends JCheckBox implements TableCellRenderer {
-    public ToggleSwitchRenderer() {
+    String  var1;
+    String var2;
+
+    public ToggleSwitchRenderer(String var1 , String var2) {
+        this.var1=var1;
+        this.var2=var2;
         setHorizontalAlignment(SwingConstants.CENTER);
     }
 
@@ -426,10 +457,16 @@ public class MainForm extends CommonForm {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                    boolean hasFocus, int row, int column) {
         if (value != null) {
-            boolean checked = (boolean) value;
-            //checked = !checked;
-            setSelected(checked);
-            setText(checked ? "ON" : "OFF");
+            try {
+                if(value instanceof Boolean) {
+                    boolean checked = (boolean) value;
+                    //checked = !checked;
+                    setSelected(checked);
+                    setText(checked ? var1 : var2);
+                }
+            }catch(Exception exception){
+                System.out.println("value===" + value);
+            }
         }
         return this;
     }
@@ -439,9 +476,13 @@ public class MainForm extends CommonForm {
 // Editor class for the toggle switch
 class ToggleSwitchEditor extends DefaultCellEditor {
     private final JCheckBox checkBox;
+    private  String var1;
+    private String var;
+    public ToggleSwitchEditor(String value, String value1) {
 
-    public ToggleSwitchEditor() {
         super(new JCheckBox());
+        this.var=value;
+        this.var1 = value1;
         checkBox = (JCheckBox) getComponent();
         checkBox.setHorizontalAlignment(SwingConstants.CENTER);
         checkBox.addActionListener(new ActionListener() {
@@ -449,16 +490,18 @@ class ToggleSwitchEditor extends DefaultCellEditor {
             public void actionPerformed(ActionEvent e) {
                 // Toggle the checkbox state and update text
                 boolean isSelected = checkBox.isSelected();
-                checkBox.setText(isSelected ? "ON" : "OFF");
+                checkBox.setText(isSelected ? value : value1);
             }
         });
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        boolean checked = (boolean) value;
-        checkBox.setSelected(checked);
-        checkBox.setText(checked ? "ON" : "OFF");
+        if(value instanceof  Boolean) {
+            boolean checked = (boolean) value;
+            checkBox.setSelected(checked);
+            checkBox.setText(checked ? var : var1);
+        }
         return checkBox;
     }
 

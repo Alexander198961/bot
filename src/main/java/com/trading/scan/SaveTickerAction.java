@@ -7,9 +7,7 @@ import com.trading.cache.Cache;
 import java.util.List;
 
 public class SaveTickerAction extends Action {
-    public List<String> getTicker() {
-        return tickerList;
-    }
+
 
     public void setTicker(List<String> tickerList) {
         this.tickerList = tickerList;

@@ -6,6 +6,7 @@ import com.trading.api.USStockContract;
 import com.trading.cache.Cache;
 import com.trading.data.TradeHistory;
 import com.trading.gui.MainForm;
+import com.trading.storage.TickerStorage;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PlaceOrderAction extends Action {
-    private double accountValue = 10000;
+    private double accountValue;
     private double risk = 1;
     private final double stopPercent;
     private final double trailingStopPrice;
@@ -63,7 +64,7 @@ public class PlaceOrderAction extends Action {
         if (price == 0 || price<0) {
             // todo: return it
             return false;
-           // price = list.get(list.size() -1).close();
+            //price = list.get(list.size() -1).close();
         }
         //todo :get currentPrice
         double totalQty = amountToPut / price;
@@ -138,6 +139,7 @@ public class PlaceOrderAction extends Action {
                     utils.pause(2000);
                 }
             }
+
       //  }
         //order.trailStopPrice(trailingStopPrice);
         //order.adjustedTrailingAmount();
@@ -145,7 +147,7 @@ public class PlaceOrderAction extends Action {
        // order.auxPrice(stopPrice);
 
 
-
+        TickerStorage.executedTickerStorage.add(ticker);
 
         return true;
     }

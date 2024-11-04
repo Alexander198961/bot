@@ -125,7 +125,7 @@ public class OptionTest extends TestSetUp {
         List<String> list = new ArrayList<>();
         Collections.addAll(list, tickers);
         Action action = new PlaceOrderAction(wrapper, null, 10000, 10, 10, 5, null);
-        scan.scan(wrapper, action, list);
+        scan.scan(wrapper, action, list, null);
         //scan.scan(wrapper, new PlaceOrderAction(wrapper, 10000, 10, 10, 5), list);
 
     }

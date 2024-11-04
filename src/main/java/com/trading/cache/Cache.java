@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Cache {
-  public static enum Keys {
+  public enum Keys {
      TradeHistory,RowNumber, Tickers, TradeConfig, EmaConfig, RequestConfig, tickersStateMap, Trailing, IsScheduled , LastRun, BarTimeFrame, StrategyEnabled, BarStateExecution
   }
    public static com.google.common.cache.Cache<String, Object> cache =CacheBuilder.newBuilder()

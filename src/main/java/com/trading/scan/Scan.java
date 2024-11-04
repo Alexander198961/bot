@@ -6,9 +6,15 @@ import com.trading.api.CustomBar;
 import com.trading.api.USStockContract;
 import com.trading.api.UnitController;
 import com.trading.cache.Cache;
+import com.trading.config.BarStateExecution;
+import com.trading.gui.MainForm;
+import com.trading.storage.TickerStorage;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Scan {
     private final UnitController unit = new UnitController();
@@ -28,7 +34,7 @@ public abstract class Scan {
     }
 
 
-    public List<String> scan(EWrapperImpl wrapper, Action action, List<String> tickers) {
+    public List<String> scan(EWrapperImpl wrapper, Action action, List<String> tickers , MainForm mainForm) {
         List<String> tickersMeetCriteria = new ArrayList<>();
         Utils utils = new Utils();
         SaveTickerAction saveTickerAction = new SaveTickerAction();
@@ -44,8 +50,13 @@ public abstract class Scan {
        // Cache.cache.getIfPresent(Cache.Keys.IsScheduled )
 
         Integer i=-1;
+        Set<String> executedTickers = TickerStorage.executedTickerStorage;
         for (String ticker : tickers) {
             i++;
+            if(executedTickers.contains(ticker)){
+                continue;
+            }
+
 
             if (ticker == null || ticker.isEmpty()) {
                 continue;
@@ -59,12 +70,18 @@ public abstract class Scan {
                  continue;
              }
             }
+
+
             Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i);
             String barSize = entry.getEntry();
             Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
 
 
+
+
             //String barSize = "1 day";
+          //  String barSize = "15 mins";
+           // String barSize = "1 min";
            // todo temp disabled bug !!!!
              //
             wrapper.setList(new ArrayList<>());
@@ -95,8 +112,9 @@ public abstract class Scan {
                 //Cache.cache.put(ticker, list);
                 //Cache.cache.put(ticker, list);
                 saveTickerAction.saveToCache(list, ticker,epochTimeLastRunSecond);
-                if (check(list, ticker, action, tickersMeetCriteria) != null) {
-                    return tickersMeetCriteria;
+
+                if (check(list, ticker, action, tickersMeetCriteria, mainForm, unit.getMapSeconds().get(barSize)) != null) {
+                   // return tickersMeetCriteria;
                 }
 
 
@@ -104,6 +122,9 @@ public abstract class Scan {
                 Long epochTimeLastRunSecond = (Long) Cache.cache.getIfPresent(Cache.Keys.LastRun + ticker);
                 Long barSizeSeconds = unit.getMapSeconds().get(barSize);
                 long epochTimeCurrent = Instant.now().getEpochSecond();
+                if(epochTimeLastRunSecond == null){
+                    continue;
+                }
                 if (epochTimeCurrent > (epochTimeLastRunSecond + barSizeSeconds)) {
                     System.out.println("read from cache===");
                     List<CustomBar> list = (List<CustomBar>) Cache.cache.getIfPresent(ticker);
@@ -128,8 +149,8 @@ public abstract class Scan {
                     //Cache.cache.put("lastRun", epochTimeCurrent);
                     //set.addAll(wrapper.getList());
                     //Cache.cache.put(ticker, set);
-                    if (check(list, ticker, action, tickersMeetCriteria) != null) {
-                        return tickersMeetCriteria;
+                    if (check(list, ticker, action, tickersMeetCriteria, mainForm, barSizeSeconds) != null) {
+
                     }
                 }
 
@@ -144,26 +165,61 @@ public abstract class Scan {
     }
 
  // todo : maybe place multiple orders
-    public Collection<String> check(List<CustomBar> list, String ticker, Action action, List<String> tickersMeetCriteria) {
+    public Collection<String> check(List<CustomBar> list, String ticker, Action action, List<String> tickersMeetCriteria, MainForm mainForm, Long barSize) {
+
+       //  fix
 
         if (criteriaIsMeet(new ArrayList<>(list))) {
-            if (action.execute(new ArrayList<>(list), ticker)) {
-                SaveTickerAction actionSave = new SaveTickerAction();
-                actionSave.setTicker(tickersMeetCriteria);
-                actionSave.execute(new ArrayList<>(list), ticker);
-                return tickersMeetCriteria;
+            CleanCacheAction cleanCacheAction = new CleanCacheAction();
+            cleanCacheAction.execute(null, ticker);
+
+
+            int j = 0;
+            do {
+                String tickerRow = (String) mainForm.getDefaultTableModel().getValueAt(j, 0);
+                if (tickerRow != null && tickerRow.equals(ticker)) {
+                    break;
+                }
+                j=j+1;
+            } while (j < 5);
+            //mainForm.getDefaultTableModel().getValueAt(0,4);
+            System.out.println("test===="  + mainForm.getDefaultTableModel().getValueAt(0,4));
+           // Cache.cache.put(Cache.Keys.BarStateExecution.name() + new Integer(i), BarStateExecution.OPEN);
+            Entry<Boolean> barStateExecution = (Entry<Boolean>) Cache.cache.getIfPresent(Cache.Keys.BarStateExecution.name() + new Integer(j));
+
+           // String barStateExecution = (String) mainForm.getDefaultTableModel().getValueAt(j,4);
+          //  Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarStateExecution.name() + j);
+           // String barStateExecution = entry.getEntry();
+
+
+
+
+            //todo remove
+            //String barStateExecution = String.valueOf(BarStateExecution.CLOSED);
+            SaveTickerAction actionSave = new SaveTickerAction();
+            actionSave.setTicker(tickersMeetCriteria);
+            actionSave.execute(new ArrayList<>(list), ticker);
+            boolean isFalse = true;
+
+            if (barStateExecution.getEntry() instanceof Boolean && barStateExecution.getEntry()  ) {
+                // Cache.Keys.BarStateExecution.name()
+                if (action.execute(new ArrayList<>(list), ticker)) {
+
+                    return tickersMeetCriteria;
+                }
+                System.out.println("ticker met criteria===" + ticker);
+                //tickersMeetCriteria.add(ticker);
+            } else {
+                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+                scheduler.schedule(() -> {
+                    action.execute(new ArrayList<>(list), ticker);
+                }, barSize, TimeUnit.SECONDS);
             }
-
-            System.out.println("ticker met criteria===" + ticker);
-            //tickersMeetCriteria.add(ticker);
         }
-        //else {
-            //SaveTickerAction actionSave = new SaveTickerAction();
-           // actionSave.saveToCache(new ArrayList<>(list), ticker);
-        //}
+            return tickersMeetCriteria;
 
-        return null; // Or handle this case differently if needed
-    }
+        }
+
 }
 
 
