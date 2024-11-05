@@ -336,11 +336,33 @@ public class EWrapperImpl implements  EWrapper {
     public void commissionReport(CommissionReport commissionReport) {
         System.out.println(EWrapperMsgGenerator.commissionReport(commissionReport));
     }
-    //! [commissionreport]
 
+    public String getTickerExecuted() {
+        return tickerExecuted;
+    }
+
+    public void setTickerExecuted(String tickerExecuted) {
+        this.tickerExecuted = tickerExecuted;
+    }
+
+    //! [commissionreport]
+    private String tickerExecuted;
+
+    public Double getAvgCost() {
+        return avgCost;
+    }
+
+    public void setAvgCost(Double avgCost) {
+        this.avgCost = avgCost;
+    }
+
+    private Double avgCost;
     //! [position]
     @Override
     public void position(String account, Contract contract, Decimal pos, double avgCost) {
+        if(contract.symbol().equals(tickerExecuted)){
+            this.avgCost =avgCost;
+        }
         System.out.println(EWrapperMsgGenerator.position(account, contract, pos, avgCost));
     }
     //! [position]

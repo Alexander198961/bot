@@ -50,9 +50,10 @@ public abstract class Scan {
        // Cache.cache.getIfPresent(Cache.Keys.IsScheduled )
 
         Integer i=-1;
-        Set<String> executedTickers = TickerStorage.executedTickerStorage;
+        Set<String> executedTickers = TickerStorage.executedTickerStorage.keySet();
         for (String ticker : tickers) {
             i++;
+
             if(executedTickers.contains(ticker)){
                 continue;
             }
@@ -75,11 +76,7 @@ public abstract class Scan {
             Entry<String> entry = (Entry<String>) Cache.cache.getIfPresent(Cache.Keys.BarTimeFrame.name() + i);
             String barSize = entry.getEntry();
             Cache.cache.put(ticker+ Cache.Keys.RowNumber, i);
-
-
-
-
-            //String barSize = "1 day";
+           // String barSize = "1 day";
           //  String barSize = "15 mins";
            // String barSize = "1 min";
            // todo temp disabled bug !!!!

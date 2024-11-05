@@ -222,6 +222,7 @@ public class MainForm extends CommonForm {
                     // Get the new value of the edited cell
                     defaultTableModel.setValueAt("",row,5);
                     defaultTableModel.setValueAt("",row,6);
+                    defaultTableModel.setValueAt("",row, 7);
                     Object newValue = model.getValueAt(row, column);
                     tickersArray[row] = newValue.toString();
                     cleanCacheAction.execute(new ArrayList<>(), (String)newValue);

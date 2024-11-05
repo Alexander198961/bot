@@ -57,6 +57,7 @@ public class PlaceOrderAction extends Action {
         Contract contract = new USStockContract(ticker);
         wrapper.getClient().reqMktData(orderId, contract, "", false, false, null);
         utils.pause(1000);
+        wrapper.getClient().cancelMktData(orderId);
         double amountToPut = accountValue / 100 * risk;
         DecimalFormat df = new DecimalFormat("#.##");
         //double price =list.get(list.size() -1).close();
@@ -145,9 +146,11 @@ public class PlaceOrderAction extends Action {
         //order.adjustedTrailingAmount();
        // stopPrice = Double.parseDouble(df.format(stopPrice));
        // order.auxPrice(stopPrice);
-
-
-        TickerStorage.executedTickerStorage.add(ticker);
+        wrapper.setTickerExecuted(ticker);
+        wrapper.getClient().reqPositions();
+        utils.pause(1000);
+        double averagePrice = wrapper.getAvgCost();
+        TickerStorage.executedTickerStorage.put(ticker, averagePrice);
 
         return true;
     }

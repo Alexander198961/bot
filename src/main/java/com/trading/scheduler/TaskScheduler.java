@@ -18,11 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskScheduler {
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final EWrapperImpl wrapper;
-    private final JTextArea textArea;
-    private final MainForm mainForm;
+public class TaskScheduler extends Scheduler {
+
+
     public TaskScheduler(EWrapperImpl wrapper, JTextArea textArea, MainForm mainForm ) {
         this.wrapper = wrapper;
         this.textArea = textArea;
@@ -81,7 +79,5 @@ public class TaskScheduler {
         */
     }
 
-    public void stop() {
-        scheduler.schedule(() -> scheduler.shutdown(), 1, TimeUnit.SECONDS);
-    }
+
 }

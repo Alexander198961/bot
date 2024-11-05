@@ -7,6 +7,7 @@ import com.trading.data.TradeHistory;
 import com.trading.gui.CommonForm;
 import com.trading.gui.HostPortInputDialog;
 import com.trading.gui.MainForm;
+import com.trading.scheduler.TaskPositionUpdater;
 import com.trading.scheduler.TaskScheduler;
 
 import javax.swing.*;
@@ -95,6 +96,9 @@ public class Main {
         JTextArea textArea = mainForm.getTextArea();
         TaskScheduler taskScheduler = new TaskScheduler(wrapper, textArea, mainForm);
         taskScheduler.run();
+
+        TaskPositionUpdater taskPositionUpdater = new TaskPositionUpdater(wrapper, mainForm);
+        taskPositionUpdater.run();
 
     }
 
